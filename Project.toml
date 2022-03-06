@@ -1,7 +1,7 @@
 name = "MembraneUtils"
 uuid = "a9449b16-1c3f-48ab-aa2c-0b9c6d97beee"
 authors = ["Will <carboxylmer@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [compat]
 julia = "1.6"
