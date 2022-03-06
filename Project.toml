@@ -3,6 +3,13 @@ uuid = "a9449b16-1c3f-48ab-aa2c-0b9c6d97beee"
 authors = ["Will <carboxylmer@gmail.com> and contributors"]
 version = "0.1.1"
 
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
+GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+TaylorSeries = "6aa5eb33-94cf-58f4-a9d0-e4b2c4fc25ea"
+
 [compat]
 julia = "1.6"
 

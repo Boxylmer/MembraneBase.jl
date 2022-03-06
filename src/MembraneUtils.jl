@@ -1,9 +1,9 @@
 module MembraneUtils
     using Measurements
     using FiniteDiff
-    using CSV
     using TaylorSeries
-
+    using GLM
+    using DataFrames
 
     include("Constants.jl")
     include("HelperFunctions.jl")

@@ -18,12 +18,12 @@ function ensure_matrices_are_same_size(mats...)
     return discovered_size  # hand the verified size back for convenience
 end
 
-# add an uncertainty of m*x to the values x where m is the uncertainty_multiplier 
+"add an uncertainty of m*x to the values x where m is the uncertainty_multiplier."
 function add_uncertainty_to_values(values::AbstractVector, uncertainty_multiplier::Number)
     return [values[i] ± (values[i] * uncertainty_multiplier) for i in eachindex(values)]
 end
 
-# run through vector and cut it at the first missing value
+"Run through vector and cut it at the first missing value."
 function chop_vector_at_first_missing_value(vector::AbstractVector)
     for i in eachindex(vector)
         if ismissing(vector[i])
@@ -32,7 +32,7 @@ function chop_vector_at_first_missing_value(vector::AbstractVector)
     end
 end
 
-# return the first value that isn't missing, if all are missing, return missing
+"Return the first value that isn't missing, if all are missing, return missing."
 function first_nonmissing_parameter(args...)
     for arg in args
         if !ismissing(arg)
@@ -42,7 +42,7 @@ function first_nonmissing_parameter(args...)
     return missing
 end
 
-# safe parse boolean
+"Safe parse boolean."
 function safe_parse_bool(string_to_parse::AbstractString; default=false) 
     formatted_string = strip(lowercase(string_to_parse), [' ',])
     if formatted_string == "true" || formatted_string == "t"
@@ -55,7 +55,7 @@ safe_parse_bool(::Missing; kwargs...) = safe_parse_bool(" "; kwargs...)
 safe_parse_bool(input::Bool; kwargs...) = input
 
 # handling measurement types
-
+"Return the base value of the measurement, regardless of what kind of measurement it is. If it isn't a measurement, return the object passed. If it's an array or struct containing measurements, return an equivalent array or struct of values."
 function strip_measurement_to_value(::Nothing)
     return nothing
 end
@@ -86,7 +86,7 @@ function strip_measurement_to_value(weird_iterable::AbstractArray{<:Any})
     return strip_measurement_to_value.(weird_iterable)
 end
 
-
+"Check if any of the arguments contain measurements."
 function contains_measurement_type(args...)
     for arg in args
         if contains_measurement_type(arg)
@@ -106,6 +106,7 @@ function contains_measurement_type(arg::AbstractArray)
     return false
 end
 
+"Calculate the (squared) contribution a measurement `var` has on a `result`ing measurement."
 function squared_uncertainty_contribution(result::Measurement, var::Measurement)
     var_key = (var.val, var.err, var.tag)
 
@@ -121,12 +122,15 @@ end
 function squared_uncertainty_contribution(::Measurement, ::Number) 
     return 0.0 # if the variable was not a measurement, the contribution to error is always zero
 end
+
+"Calculate the fractional contribution a measurement `var` has on a `result`ing measurement."
 function fractional_uncertainty_contribution(result::Measurement, var::Number)
     return squared_uncertainty_contribution(result, var)/result.err^2 
 end
 
 # approximations and general mathy things
 
+"Calculate the sum of squared residuals of an `experimental` value to some `predicted` value`."
 function rss(experimental::AbstractVector{<:Measurement}, predicted::AbstractVector{<:Number})
     return sum(([item.val for item in experimental] - strip_measurement_to_value(predicted)).^2 ./ [item.err for item in experimental].^2)
 end
@@ -135,14 +139,17 @@ function rss(experimental::AbstractVector{<:Number}, predicted::AbstractVector{<
 end
 
 # Find the parameter error and other things involving RSS 
+"Estimate the hessian matrix of a function with respect to a vector of values. The value vector should match the input of the `func`tion."
 function approximate_hessian(func::Function, values::AbstractVector{<:Number})
     return FiniteDiff.finite_difference_hessian(func, values)
 end
 
 # todo as of 8/25/2021, symmetric staticarrays do not work with inv(). Thus, we need to return it to a normal matrix for now. If this issue is fixed, remove this and test.
 # https://github.com/JuliaArrays/StaticArrays.jl/issues/955 
+"Calculate the inverse hessian matrix of an rss function `rss_func`, with respect to some minimizer `minimizer_values`."
 inverse_hessian(rss_func::Function, minimizer_values::AbstractVector{<:Number}) = inv(Symmetric(Matrix(approximate_hessian(rss_func, minimizer_values))))
 
+"Estimate the standard error squared" # depricated? todo remove this
 rss_standard_error_squared(rss_value, num_params::Integer, num_datapts::Integer) = (rss_value / (num_datapts - num_params))
 
 # function rss_covariance_matrix(rss_func::Function, minimizer_values::AbstractVector{<:Number}, num_observations::Integer)
@@ -152,6 +159,7 @@ rss_standard_error_squared(rss_value, num_params::Integer, num_datapts::Integer)
 #     return cov_mat
 # end 
 
+"Estimate the RSS covariance matrix using the inverse hessian method."
 function rss_covariance_matrix(rss_func::Function, minimizer_values::AbstractVector{<:Number}, num_observations::Integer)
     inv_hess = inverse_hessian(rss_func, minimizer_values)
     # rss_squared = rss_standard_error_squared(rss_func(minimizer_values), length(minimizer_values), num_observations)
@@ -159,6 +167,7 @@ function rss_covariance_matrix(rss_func::Function, minimizer_values::AbstractVec
     return cov_mat
 end 
 
+"Get standard errors from an RSS function using the already optimized (minimizer) values."
 function rss_minimizer_standard_errors(rss_func::Function, minimizer_values::AbstractVector{<:Number}, num_observations::Integer)
     mat = rss_covariance_matrix(rss_func, minimizer_values, num_observations)
     covariance_diagonals = diag(mat)
@@ -167,6 +176,7 @@ function rss_minimizer_standard_errors(rss_func::Function, minimizer_values::Abs
 end
 
 # linear fittings
+"Using two adjacent points in a vector, estimate the slope of a series."
 function estimate_slope_by_adjacent_points(x_vector::AbstractVector, y_vector::AbstractVector, point_index::Integer)
     lenx = length(x_vector)
     if point_index == 1
@@ -183,6 +193,7 @@ function estimate_slope_by_adjacent_points(x_vector::AbstractVector, y_vector::A
     return [estimate_slope_by_adjacent_points(x_vector, y_vector, idx) for idx in eachindex(y_vector)]
 end
 
+"Apply linear interpolation to two points."
 function interpolate_linearly(x0, y0, x1, y1, x)
     y = y0 + (x - x0) * (y1 - y0) / (x1 - x0)
     return y
@@ -330,24 +341,28 @@ function antoines_vapor_pressure(a, b, c, temp_k)
     return 10^(a - b / (c + temp_k))
 end
 
+"Convert mass fraction to mole fraction."
 function mass_fractions_to_mole_fractions(mass_fractions, molecular_weights)
     moles = mass_fractions ./ molecular_weights
     mole_fractions = moles ./ sum(moles)
     return mole_fractions
 end
 
+"Convert mole fraction to mass fraction."
 function mole_fractions_to_mass_fractions(mole_fractions, molecular_weights)
     masses = mole_fractions .* molecular_weights
     mass_fractions = masses ./ sum(masses)
     return mass_fractions
 end
 
+"Convert molar volume to density."
 function molar_volume_to_density(molar_volume_l_mol, mole_fractions, molecular_weights_g_mol)
     molar_density = 1 / molar_volume_l_mol  # L/mol -> mol/L
     mass_concentrations = molar_density .* mole_fractions .* molecular_weights_g_mol
     return sum(mass_concentrations) / 1000 # g / cm3
 end
 
+"Convert density to molar volume."
 function density_to_molar_volume(density_g_cm3, mole_fractions, molecular_weights_g_mol)
     mass_fracs = mole_fractions_to_mass_fractions(mole_fractions, molecular_weights_g_mol)
     molar_densities = density_g_cm3 * 1000 .* mass_fracs ./ molecular_weights_g_mol
@@ -355,11 +370,12 @@ function density_to_molar_volume(density_g_cm3, mole_fractions, molecular_weight
     return molar_volume  # L / mol
 end
 
-# assumes that the polymer is the first item in the vector
+"Convert polymer phase mass fractions to `g(penetrant)/g(polymer)`. Assumes that the polymer is the first item in the vector."
 function polymer_phase_mass_fractions_to_gpen_per_gpol(mass_fractions)
     return mass_fractions[2:end] ./ mass_fractions[1]
 end
 
+"Convert polymer phase mass fraction to CC(STP)/CC(polymer)."
 function polymer_phase_mass_fractions_to_ccpen_per_ccpol(mass_fractions, polymer_density_g_cm3, penetrant_molecular_weights)
     # mass fractions includes the polymer
     g_per_g = polymer_phase_mass_fractions_to_gpen_per_gpol(mass_fractions)
