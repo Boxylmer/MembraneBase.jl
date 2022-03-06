@@ -1,7 +1,7 @@
 
 # utility methods
 
-# throw an error if the given matrixes aren't the same size
+"Throw an error if the given matrixes aren't the same size, otherwise return their size."
 function ensure_matrices_are_same_size(mats...)
     discovered_size = nothing
     for mat in mats  # for every matrix to be compared,
