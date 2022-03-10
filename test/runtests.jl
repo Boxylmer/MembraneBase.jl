@@ -1,10 +1,10 @@
-using MembraneUtils
+using MembraneBase
 using Test
 
 using Measurements
 
 
-@testset "MembraneUtils.jl" begin
+@testset "MembraneBase.jl" begin
     
     # ensure_matrices_are_same_size
     mat1 = rand(1, 2, 3)

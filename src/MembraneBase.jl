@@ -1,4 +1,4 @@
-module MembraneUtils
+module MembraneBase
     using Measurements
     using FiniteDiff
     using TaylorSeries
