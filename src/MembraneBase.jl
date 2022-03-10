@@ -4,11 +4,11 @@ module MembraneBase
     using TaylorSeries
     using GLM
     using DataFrames
-
+    
     include("Constants.jl")
     include("HelperFunctions.jl")
 
-
+    # main utility methods
     export ensure_matrices_are_same_size
     export add_uncertainty_to_values
     export chop_vector_at_first_missing_value
