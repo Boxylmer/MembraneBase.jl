@@ -4,6 +4,8 @@ module MembraneBase
     using TaylorSeries
     using GLM
     using DataFrames
+    using Bootstrap
+    using StaticArrays
     
     include("Constants.jl")
     include("HelperFunctions.jl")
@@ -40,5 +42,38 @@ module MembraneBase
     export polymer_phase_mass_fractions_to_gpen_per_gpol
     export polymer_phase_mass_fractions_to_ccpen_per_ccpol
 
+    # isotherm methods
+    include(joinpath("DataTypes", "isotherm.jl"))
+    export IsothermData
+    export isotherm_dataset
+    export pressure
+    export partial_pressures
+    export concentration
+    export mole_fractions
+    export activities
+    export fugacities
+    export temperature
+    export polymer_density
+    export molecular_weights
+    export num_components
+    export num_steps
+    export mass_sorbed
+
+    #isotherm Datasets
+    include(joinpath("DataTypes", "IsothermDatasets", "TPCDataset.jl"))
+    # export TPCDataset
+    # export get_isotherms
+
+    # transient step data
+    include(joinpath("DataTypes", "transientstep.jl"))
+    export TransientStepData
+    export resample
+    export dataset
+    
+    # statistical methods
+    include(joinpath("StatisticalMethods", "bootstrap.jl"))
+    include(joinpath("StatisticalMethods", "jackknife.jl"))
+    export bootstrap_uncertainty
+    export jackknife_uncertainty
 
 end
