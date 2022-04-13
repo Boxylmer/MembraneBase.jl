@@ -157,61 +157,61 @@ using Measurements
 
     end
 
-    @testset "Isotherm Datasets" begin
+    @testset "Isotherm Datasets - Deprecated" begin
         iso = IsothermData(partial_pressures_mpa = [1, 2, 3], concentrations_cc = [1, 4, 8], temperature_k = 273.15)
         iso2 = IsothermData(partial_pressures_mpa = [0.34, 2, 3, 8], concentrations_cc = [1, 2, 6, 7], temperature_k = 273.15)
         iso3 = IsothermData(partial_pressures_mpa = [0.4, 2, 5], concentrations_cc = [0.9, 4, 5], temperature_k = 300.15)
-        single_isotherm_dataset = MembraneBase.TPCDataset(iso)
-        @test single_isotherm_dataset[2] == [273.15, 2.0, 4.0]
-        @test single_isotherm_dataset[1:2] == [[273.15, 1.0, 1.0], [273.15, 2.0, 4.0]]
-        new_data = copy(single_isotherm_dataset)
-        @test deleteat!(new_data, 2) == [[273.15, 1.0, 1.0], [273.15, 3.0, 8.0]]
+        # single_isotherm_dataset = MembraneBase.TPCDataset(iso)
+        # @test single_isotherm_dataset[2] == [273.15, 2.0, 4.0]
+        # @test single_isotherm_dataset[1:2] == [[273.15, 1.0, 1.0], [273.15, 2.0, 4.0]]
+        # new_data = copy(single_isotherm_dataset)
+        # @test deleteat!(new_data, 2) == [[273.15, 1.0, 1.0], [273.15, 3.0, 8.0]]
 
-        multi_dataset = MembraneBase.TPCDataset([iso, iso2, iso3])
-        @test multi_dataset.tpc_vectors == [
-            [273.15, 0.34, 1.0],
-            [273.15, 1.0, 1.0],
-            [273.15, 2.0, 2.0],
-            [273.15, 2.0, 4.0],
-            [273.15, 3.0, 6.0],
-            [273.15, 3.0, 8.0],
-            [273.15, 8.0, 7.0],
-            [300.15, 0.4, 0.9],
-            [300.15, 2.0, 4.0],
-            [300.15, 5.0, 5.0]]
+        # multi_dataset = MembraneBase.TPCDataset([iso, iso2, iso3])
+        # @test multi_dataset.tpc_vectors == [
+        #     [273.15, 0.34, 1.0],
+        #     [273.15, 1.0, 1.0],
+        #     [273.15, 2.0, 2.0],
+        #     [273.15, 2.0, 4.0],
+        #     [273.15, 3.0, 6.0],
+        #     [273.15, 3.0, 8.0],
+        #     [273.15, 8.0, 7.0],
+        #     [300.15, 0.4, 0.9],
+        #     [300.15, 2.0, 4.0],
+        #     [300.15, 5.0, 5.0]]
         
-        recovered_isotherms = MembraneBase.get_isotherms(multi_dataset)
+        # recovered_isotherms = MembraneBase.get_isotherms(multi_dataset)
         
-        remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
-        @test remade_dataset == multi_dataset
+        # remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
+        # @test remade_dataset == multi_dataset
 
         # test the potential edge case of one last temperature remaining that's different
-        iso4 = IsothermData(partial_pressures_mpa = [1, 2, 3], concentrations_cc = [1, 4, 8], temperature_k = 273.15)
-        iso5 = IsothermData(partial_pressures_mpa = [6], concentrations_cc = [6], temperature_k = 308.15)
-        iso6 = IsothermData(partial_pressures_mpa = [5], concentrations_cc = [5], temperature_k = 100.15)
-        one_single_temp_dataset = MembraneBase.TPCDataset([iso4, iso5, iso6])
-        recovered_isotherms = MembraneBase.get_isotherms(one_single_temp_dataset)
-        remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
-        @test remade_dataset == one_single_temp_dataset
+        # iso4 = IsothermData(partial_pressures_mpa = [1, 2, 3], concentrations_cc = [1, 4, 8], temperature_k = 273.15)
+        # iso5 = IsothermData(partial_pressures_mpa = [6], concentrations_cc = [6], temperature_k = 308.15)
+        # iso6 = IsothermData(partial_pressures_mpa = [5], concentrations_cc = [5], temperature_k = 100.15)
+        # one_single_temp_dataset = MembraneBase.TPCDataset([iso4, iso5, iso6])
+        # recovered_isotherms = MembraneBase.get_isotherms(one_single_temp_dataset)
+        # remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
+        # @test remade_dataset == one_single_temp_dataset
 
         # test the potential edge case of a single datapoint
-        iso7 = IsothermData(partial_pressures_mpa = [1], concentrations_cc = [1], temperature_k = 273.15)
-        dataset = MembraneBase.TPCDataset([iso7])
-        recovered_isotherms = MembraneBase.get_isotherms(dataset)
-        remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
-        @test remade_dataset == dataset
+        # iso7 = IsothermData(partial_pressures_mpa = [1], concentrations_cc = [1], temperature_k = 273.15)
+        # dataset = MembraneBase.TPCDataset([iso7])
+        # recovered_isotherms = MembraneBase.get_isotherms(dataset)
+        # remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
+        # @test remade_dataset == dataset
 
         # toss all the isotherms together for good measure
-        dataset = MembraneBase.TPCDataset([iso, iso2, iso3, iso4, iso5, iso6, iso7])
-        recovered_isotherms = MembraneBase.get_isotherms(dataset)
-        remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
-        @test remade_dataset == dataset
+        # dataset = MembraneBase.TPCDataset([iso, iso2, iso3, iso4, iso5, iso6, iso7])
+        # recovered_isotherms = MembraneBase.get_isotherms(dataset)
+        # remade_dataset = MembraneBase.TPCDataset(recovered_isotherms)
+        # @test remade_dataset == dataset
 
 
         # todo the same thing as above, but with use_fugacity set true
 
-        fug_iso = IsothermData(fugacities_mpa = [1, 2, 3], concentrations_cc = [1, 4, 8], temperature_k = 273.15)
-        fug_dataset = MembraneBase.TPCDataset(fug_iso; use_fugacity = true)
+        # fug_iso = IsothermData(fugacities_mpa = [1, 2, 3], concentrations_cc = [1, 4, 8], temperature_k = 273.15)
+        # fug_dataset = MembraneBase.TPCDataset(fug_iso; use_fugacity = true)
         # @test fugacities(IsothermData(dataset); component=1, step = 3) == 3
         # @show IsothermData(dataset)
     end
@@ -224,7 +224,9 @@ using Measurements
         @test resample(tstep, 10, :Root).time[7] == 5.961012293408168
         @test resample(tstep, 5, :Log).time[3] == 3.1622776601683795
 
-
+        tstep_err = TransientStepData([1 ± 3, 2,   3,    4,     5,      6,    7,    8,    9,     10], 
+                                [0 ± 0.1, 0.5, 0.75, 0.875, 0.9375, 0.97, 0.98, 0.99, 0.995, 1.00])
+        tstep_clean = strip_measurement_to_value(tstep_err)
     end
 
 end # end overall tests
