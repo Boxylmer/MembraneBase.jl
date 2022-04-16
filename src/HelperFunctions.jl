@@ -163,7 +163,9 @@ rss_standard_error_squared(rss_value, num_params::Integer, num_datapts::Integer)
 function rss_covariance_matrix(rss_func::Function, minimizer_values::AbstractVector{<:Number}, num_observations::Integer)
     inv_hess = inverse_hessian(rss_func, minimizer_values)
     # rss_squared = rss_standard_error_squared(rss_func(minimizer_values), length(minimizer_values), num_observations)
-    cov_mat = inv_hess * 2 
+    dof = num_observations - length(minimizer_values)
+    scaling_factor = rss_func(minimizer_values) / dof
+    cov_mat = inv_hess * scaling_factor
     return cov_mat
 end 
 

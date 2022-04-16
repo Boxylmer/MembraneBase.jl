@@ -6,6 +6,7 @@ module MembraneBase
     using DataFrames
     using Bootstrap
     using StaticArrays
+    using LinearAlgebra
     
     include("Constants.jl")
     include("HelperFunctions.jl")

@@ -91,8 +91,11 @@ using Measurements
         end
         taylorfunc = get_taylor_series_function(myfunc, [0.5, 0.5, 0.5, 0.5, 0.5], 17)
         @test taylorfunc([0.1, 0.5, 0.1, 0.2, 0.56]) ≈ myfunc([0.1, 0.5, 0.1, 0.2, 0.56])
-    
 
+        # the inverse hessian methods
+        objective_function(xy) = ((xy[1] + xy[2])^2 + (xy[1]-1)^2 + (xy[2]-0.8)^2)^2
+        minimizer = [0.494234234, 0.25034623146]
+        @test errs = rss_minimizer_standard_errors(objective_function, minimizer, 10) ≈ [0.15049509481360718, 0.1517352228363271]
 
     end
 
