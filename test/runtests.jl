@@ -141,8 +141,13 @@ using Measurements
             0.003186783770347614 0.011950439138803554; 
             0.004780175655521421 0.014340526966564264]
 
-        # mass_fracs = penetrant_mass_fractions(iso; step=1, component=2)  # TODO
-        # @test round(mass_fracs; digits=precision) == round(0.009469816538087601; digits=precision)
+        @show mass_fracs = penetrant_mass_fractions(iso; step=1, component=2)  # TODO
+        @show mass_fracs # 0.009469816538087601; digits=precision)
+
+        @show mass_fracs = penetrant_mass_fractions(iso; step=1)
+        @show totals = [1 - sum(mass_fracs), mass_fracs...]
+        @show polymer_phase_mass_fractions_to_gpen_per_gpol(totals)
+        @show concs_g_g = concentration(iso; step=1, pol_units=:g, gas_units=:g)
 
         @test pressure(iso) == [2, 4, 6]
         @test pressure(iso; step=2) == 4
@@ -155,6 +160,7 @@ using Measurements
         @test mole_fractions(iso) == [0.5 0.5; 0.5 0.5; 0.5 0.5]
         @test mole_fractions(iso; step=2) == [0.5, 0.5]
         @test mole_fractions(iso_2) == [1; 1; 1][:,:]
+        
         
 
 

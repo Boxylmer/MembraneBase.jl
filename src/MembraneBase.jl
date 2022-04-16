@@ -59,6 +59,7 @@ module MembraneBase
     export num_components
     export num_steps
     export mass_sorbed
+    export penetrant_mass_fractions
 
     #isotherm Datasets
     # include(joinpath("DataTypes", "IsothermDatasets", "TPCDataset.jl"))

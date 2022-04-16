@@ -287,11 +287,11 @@ function mass_sorbed(isotherm::IsothermData, polymer_mass_g::Number; component=:
     return _masses_sorbed
 end
 
-#NOT FULLY GENERIC YET: assumes that all other components are ≈ 0. Could circumvent this by adding the masses of the other components into the denominator
-# function penetrant_mass_fractions(isotherm::IsothermData; component=:, step=:)
-#     concs_g_g = concentration(isotherm; component=component, step=step, gas_units=:g, pol_units=:g)
-#     mass_fractions = concs_g_g ./ (1 .+ concs_g_g)  # system = 1g pol + whatever g penetrant
+# NOT FULLY GENERIC YET: assumes that all other components are ≈ 0. Could circumvent this by adding the masses of the other components into the denominator
+function penetrant_mass_fractions(isotherm::IsothermData; component=:, step=:)
+    concs_g_g = concentration(isotherm; component=component, step=step, gas_units=:g, pol_units=:g)
+    mass_fractions = concs_g_g ./ (1 .+ concs_g_g)  # system = 1g pol + whatever g penetrant
 
-#     return mass_fractions
+    return mass_fractions
 
-# end
+end
