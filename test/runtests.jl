@@ -144,10 +144,11 @@ using Measurements
         @show mass_fracs = penetrant_mass_fractions(iso; step=1, component=2)  # TODO
         @show mass_fracs # 0.009469816538087601; digits=precision)
 
-        @show mass_fracs = penetrant_mass_fractions(iso; step=1)
-        @show totals = [1 - sum(mass_fracs), mass_fracs...]
+        mass_fracs = penetrant_mass_fractions(iso; step=1)
+        totals = [1 - sum(mass_fracs), mass_fracs...]
         @show polymer_phase_mass_fractions_to_gpen_per_gpol(totals)
         @show concs_g_g = concentration(iso; step=1, pol_units=:g, gas_units=:g)
+        
 
         @test pressure(iso) == [2, 4, 6]
         @test pressure(iso; step=2) == 4
