@@ -43,10 +43,18 @@ Use this method when you have a ridiculous amount of data and need to slim it do
 
 This function assumes that time data is sorted in ascending order
 """
-function resample(transient::TransientStepData, num_datapoints, time_function)
+function resample(transient::TransientStepData, num_datapoints, time_function; skip_validity_checks=false)
     # todo: remove any data point at or below zero if using :Log, right now theres a quick fix that just removes 0
     max_time = max(transient.time...)
     min_time = min(transient.time...)
+    
+    if !skip_validity_checks
+        if minimum([transient.time[i+1] - transient.time[i]] for i in eachindex(transient.time)[1:end-1])[1] < 0
+            idx = findmin(collect([transient.time[i+1] - transient.time[i]] for i in eachindex(transient.time)[1:end-1]))[2]
+            throw(DomainError(
+                "Warning: Time must always increase. At least one point in the transient step was backwards in time (largest change at index " * string(idx) * ")"))
+        end
+    end
 
     if time_function == :Linear
         # it's already linear!
