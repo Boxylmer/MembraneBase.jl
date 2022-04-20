@@ -1,7 +1,7 @@
 using MembraneBase
 using Test
-
 using Measurements
+using BenchmarkTools
 
 @testset "MembraneBase.jl" begin
     
@@ -99,6 +99,40 @@ using Measurements
 
     end
 
+    @testset "Statistical Methods" begin
+        ndata = 25
+        data_x = collect(1:ndata)
+        data_y = data_x # (data_x .+ randn(100)) .^ 2.5
+        data = collect(zip(data_x, data_y))
+        # function predictor(b_vec)
+        #     y = data_x .^ b_vec[1]
+        #     err = sum((y .- data_y) .^ 2)
+        #     return err / 1e9
+        # end
+
+        # this doesn't actually fit anything, it just returns 5 plus a random number
+        function fitter(data_pairs)
+            return [5 + randn(1)[1]]
+        end
+
+        j_σ = jackknife_uncertainty(fitter, data)
+        @test round(j_σ[1]; digits=0) == 1
+
+        b_σ = bootstrap_uncertainty(fitter, data)
+        @test round(b_σ[1]; digits=0) == 1
+
+        function run_boot()
+            b_σ = bootstrap_uncertainty(fitter, data)
+        end
+        function run_jack()
+            j_σ = jackknife_uncertainty(fitter, data)
+        end
+        @btime $run_boot()
+        @btime $run_jack()
+        
+
+    end
+
     @testset "Isotherm Data Structures" begin
         # Basic isotherm creastion
         pure_iso = IsothermData(partial_pressures_mpa = [1], concentrations_cc = [2])
@@ -141,14 +175,12 @@ using Measurements
             0.003186783770347614 0.011950439138803554; 
             0.004780175655521421 0.014340526966564264]
 
-        @show mass_fracs = penetrant_mass_fractions(iso; step=1, component=2)  # TODO
-        @show mass_fracs # 0.009469816538087601; digits=precision)
-
+        
         mass_fracs = penetrant_mass_fractions(iso; step=1)
         totals = [1 - sum(mass_fracs), mass_fracs...]
-        @show polymer_phase_mass_fractions_to_gpen_per_gpol(totals)
-        @show concs_g_g = concentration(iso; step=1, pol_units=:g, gas_units=:g)
-        
+        g_g_converted_back =  polymer_phase_mass_fractions_to_gpen_per_gpol(totals)
+        concs_g_g = concentration(iso; step=1, pol_units=:g, gas_units=:g)
+        @test concs_g_g ≈ g_g_converted_back
 
         @test pressure(iso) == [2, 4, 6]
         @test pressure(iso; step=2) == 4
@@ -247,3 +279,4 @@ using Measurements
     end
 
 end # end overall tests
+nothing
