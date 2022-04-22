@@ -357,7 +357,7 @@ function mole_fractions_to_mass_fractions(mole_fractions, molecular_weights)
     return mass_fractions
 end
 
-"Convert molar volume to density."
+"Convert molar volume to density in g/cm^3."
 function molar_volume_to_density(molar_volume_l_mol, mole_fractions, molecular_weights_g_mol)
     molar_density = 1 / molar_volume_l_mol  # L/mol -> mol/L
     mass_concentrations = molar_density .* mole_fractions .* molecular_weights_g_mol
