@@ -11,6 +11,7 @@ const R_ATM_M3_K_MOL = R_ATM_L_K_MOL / 1000   # atm * m^3 / (K * mol)
 const MPA_PER_ATM = 0.101325
 const ATM_PER_MPA = 1 / MPA_PER_ATM 
 const MPA_PER_PA = 0.000001
+const PA_PER_MPA = 1 / MPA_PER_PA 
 const MPA_PER_BAR = 0.1
 const PA_PER_ATM = MPA_PER_ATM / MPA_PER_PA
 const ATM_PER_PA = 1 / PA_PER_ATM
