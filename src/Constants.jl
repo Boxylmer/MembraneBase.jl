@@ -14,6 +14,10 @@ const MPA_PER_PA = 0.000001
 const MPA_PER_BAR = 0.1
 const PA_PER_ATM = MPA_PER_ATM / MPA_PER_PA
 const ATM_PER_PA = 1 / PA_PER_ATM
+const MPA_PER_PSI = 0.006894757293
+const PSI_PER_MPA = 1 / MPA_PER_PSI
+const ATM_PER_PSI = ATM_PER_MPA * MPA_PER_PSI
+const PSI_PER_ATM = 1 / ATM_PER_PSI
 
 # volume
 const L_PER_CC = 0.001
