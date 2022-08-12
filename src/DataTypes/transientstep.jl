@@ -32,16 +32,17 @@ Container for data concerning a single transient sorption step. I.e., a profile 
     - the first item being an iterable of time data (in **seconds**)
     - the second item being an iterable of dimensionless sorption data (no units)  
 """
+function TransientStepData(dataset::AbstractVector{Tuple{Float64, Float64}})
+    reinterpretation = reinterpret(reshape, Float64, dataset)
+    time_data = @view reinterpretation[1, :]
+    sorption_data = @view reinterpretation[2, :]
+    return TransientStepData(time_data, sorption_data)
+end
 function TransientStepData(dataset::Union{Tuple, AbstractVector})
-    if eltype(dataset) <: Tuple{Float64, Float64}
-        reinterpretation = reinterpret(reshape, Float64, vec)
-        time_data = @view reinterpretation[1, :]
-        sorption_data = @view reinterpretation[:, 1]
-    else
-        @warn "Non-Float64 types handed to TransientStepData, conversion will be very slow."
-        time_data = [datum[1] for datum in dataset]
-        sorption_data = [datum[2] for datum in dataset]
-    end
+    found_type = typeof(dataset)
+    @warn "Non-Float64 types handed to TransientStepData (got $found_type), conversion will be very slow."
+    time_data = [datum[1] for datum in dataset]
+    sorption_data = [datum[2] for datum in dataset]
     return TransientStepData(time_data, sorption_data)
 end
 

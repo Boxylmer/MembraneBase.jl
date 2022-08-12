@@ -278,9 +278,13 @@ using Revise
         @test_throws DomainError resample(tstep_invalid, 4, :Root)
         # @btime TransientStepData($[1, 2,   3 ± 0.1, 4, 5 ± 0.1, 6, 7, 8,  9, 10], 
         #     $[0, 0.5, 0.75, 0.875, 0.9375, 0.97, 0.98, 0.99, 0.995 ± 0.1, 1.00])
+        
+        ds = dataset(tstep)
+        @test ds[2][2] == 0.5
 
-        @test dataset(tstep)[2][2] == 0.5
-
+        @test eltype(ds) <: Tuple{Float64, Float64}
+        recovered_tsd = TransientStepData(ds)
+        @test recovered_tsd.dimensionlesssorption[6] == 0.97
         # @btime resample($tstep, 10, :Root)
         # @btime dataset($tstep)
     end
