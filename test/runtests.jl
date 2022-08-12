@@ -2,6 +2,7 @@ using MembraneBase
 using Test
 using Measurements
 using BenchmarkTools
+using Revise
 
 @testset "MembraneBase.jl" begin
     
@@ -100,7 +101,7 @@ using BenchmarkTools
     end
 
     @testset "Statistical Methods" begin
-        ndata = 25
+        ndata = 50
         data_x = collect(1:ndata)
         data_y = data_x # (data_x .+ randn(100)) .^ 2.5
         data = collect(zip(data_x, data_y))
@@ -127,8 +128,8 @@ using BenchmarkTools
         function run_jack()
             j_σ = jackknife_uncertainty(fitter, data)
         end
-        @btime $run_boot()
-        @btime $run_jack()
+        # @btime $run_boot()
+        # @btime $run_jack()
         
 
     end
@@ -260,7 +261,7 @@ using BenchmarkTools
 
     @testset "Transient Step Structure" begin
         # resampling
-        tstep = TransientStepData([1, 2,   3,    4,     5,      6,    7,    8,    9,     10], 
+        tstep = TransientStepData([1., 2,   3,    4,     5,      6,    7,    8,    9,     10], 
                                 [0, 0.5, 0.75, 0.875, 0.9375, 0.97, 0.98, 0.99, 0.995, 1.00])
         @test resample(tstep, 10, :Linear).time[6] == 6.0
         @test resample(tstep, 10, :Root).time[7] == 5.961012293408168
@@ -275,7 +276,13 @@ using BenchmarkTools
             [1 ± 0.1, 2,   1.9,    4,     5,      6,    7,    8,    9,     10], 
             [0 ± 0.2, 0.5, 0.75,   0.875, 0.9375, 0.97, 0.98, 0.99, 0.995, 1.00])
         @test_throws DomainError resample(tstep_invalid, 4, :Root)
-   
+        # @btime TransientStepData($[1, 2,   3 ± 0.1, 4, 5 ± 0.1, 6, 7, 8,  9, 10], 
+        #     $[0, 0.5, 0.75, 0.875, 0.9375, 0.97, 0.98, 0.99, 0.995 ± 0.1, 1.00])
+
+        @test dataset(tstep)[2][2] == 0.5
+
+        # @btime resample($tstep, 10, :Root)
+        # @btime dataset($tstep)
     end
 
 end # end overall tests

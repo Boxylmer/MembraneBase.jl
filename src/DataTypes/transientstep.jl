@@ -1,13 +1,27 @@
-struct TransientStepData
-    time::AbstractVector{<:Number}  # seconds
-    dimensionlesssorption::AbstractVector{<:Number}  # unitless
-    function TransientStepData(t, dimensionlesssorption)
-        if length(t) != length(dimensionlesssorption)
-            return DimensionMismatch("Time vector and sorption vector did not match in length")
-        end
-        return new(t, dimensionlesssorption)
+struct TransientStepData{N}
+    time::MVector{N, Float64}  # seconds
+    dimensionlesssorption::MVector{N, Float64}  # unitless
+end
+function TransientStepData(t::AbstractVector, dimensionlesssorption::AbstractVector)
+    n = length(t)
+    @assert n == length(dimensionlesssorption)
+    tt = eltype(t)
+    st = eltype(dimensionlesssorption)
+    if st <: Measurement && tt <: Measurement
+        return TransientStepData(
+            MVector{n, Float64}(strip_measurement_to_value(t)), 
+            MVector{n, Float64}(strip_measurement_to_value(dimensionlesssorption))
+        )
+    elseif st <: Measurement
+        return TransientStepData(MVector{n, Float64}(t), MVector{n, Float64}(strip_measurement_to_value(dimensionlesssorption)))
+    elseif tt <: Measurement
+        return TransientStepData(MVector{n, Float64}(strip_measurement_to_value(t)), MVector{n, Float64}(dimensionlesssorption))
+    else
+        return TransientStepData(MVector{n, Float64}(t), MVector{n, Float64}(dimensionlesssorption))
     end
 end
+
+
 
 """
     TransientStepData(dataset)
@@ -19,10 +33,15 @@ Container for data concerning a single transient sorption step. I.e., a profile 
     - the second item being an iterable of dimensionless sorption data (no units)  
 """
 function TransientStepData(dataset::Union{Tuple, AbstractVector})
-    # dataset = [(a, b)...]
-    # zipped = collect(zip(dataset...)) # this throws an SO error??
-    time_data = [datum[1] for datum in dataset]
-    sorption_data = [datum[2] for datum in dataset]
+    if eltype(dataset) <: Tuple{Float64, Float64}
+        reinterpretation = reinterpret(reshape, Float64, vec)
+        time_data = @view reinterpretation[1, :]
+        sorption_data = @view reinterpretation[:, 1]
+    else
+        @warn "Non-Float64 types handed to TransientStepData, conversion will be very slow."
+        time_data = [datum[1] for datum in dataset]
+        sorption_data = [datum[2] for datum in dataset]
+    end
     return TransientStepData(time_data, sorption_data)
 end
 
@@ -45,12 +64,11 @@ This function assumes that time data is sorted in ascending order
 """
 function resample(transient::TransientStepData, num_datapoints, time_function; skip_validity_checks=false)
     # todo: remove any data point at or below zero if using :Log, right now theres a quick fix that just removes 0
-    max_time = max(transient.time...)
-    min_time = min(transient.time...)
+    min_time, max_time = extrema(transient.time)
     
     if !skip_validity_checks
-        if minimum([transient.time[i+1] - transient.time[i]] for i in eachindex(transient.time)[1:end-1])[1] < 0
-            idx = findmin(collect([transient.time[i+1] - transient.time[i]] for i in eachindex(transient.time)[1:end-1]))[2]
+        if minimum(transient.time[i+1] - transient.time[i] for i in eachindex(transient.time)[1:end-1])[1] < 0
+            idx = findmin(collect(transient.time[i+1] - transient.time[i] for i in eachindex(transient.time)[1:end-1]))[2]
             throw(DomainError(
                 "Warning: Time must always increase. At least one point in the transient step was backwards in time (largest change at index " * string(idx) * ")"))
         end
@@ -68,9 +86,8 @@ function resample(transient::TransientStepData, num_datapoints, time_function; s
     elseif time_function == :Log
         # remove zero if present
         if min_time == 0
-            min_time = min(transient.time[2:end]...)
+            min_time = minimum(transient.time[2:end])
         end
-
         max_time = log10(max_time)
         min_time = log10(min_time)
         step_size = (max_time - min_time) / (num_datapoints - 1)
@@ -83,19 +100,18 @@ function resample(transient::TransientStepData, num_datapoints, time_function; s
     # some weirdness with floating point errors can occur here that makes searching by index a pain
     # here, we make absolutely sure the values are *exactly* what they should be
     resampled_time[1] = transient.time[1]
-    resampled_time[end] = transient.time[end]  
-
-    original_time = strip_measurement_to_value(transient.time)  # todo remove these strips and run tests
-    sorption_data = strip_measurement_to_value(transient.dimensionlesssorption)
+    resampled_time[end] = transient.time[end]     
     
-    resampled_sorption = similar(resampled_time, eltype(sorption_data))
+    # resampled_sorption = similar(resampled_time, eltype(transient.dimensionlesssorption))
+    resampled_sorption = similar(resampled_time)
+    
     for (sorption_idx, t) in enumerate(resampled_time)
-        idx1 = searchsortedfirst(original_time, t)
-        if original_time[idx1] == t
-            resampled_sorption[sorption_idx] = sorption_data[idx1]
+        idx1 = searchsortedfirst(transient.time, t)
+        if transient.time[idx1] == t
+            resampled_sorption[sorption_idx] = transient.dimensionlesssorption[idx1]
         else
             idx0 = idx1 - 1
-            interpolated_sorption = interpolate_linearly(original_time[idx0], sorption_data[idx0], original_time[idx1], sorption_data[idx1], t)
+            interpolated_sorption = interpolate_linearly(transient.time[idx0], transient.dimensionlesssorption[idx0], transient.time[idx1], transient.dimensionlesssorption[idx1], t)
             resampled_sorption[sorption_idx] = interpolated_sorption
         end
     end
@@ -104,6 +120,7 @@ function resample(transient::TransientStepData, num_datapoints, time_function; s
 end
 
 function dataset(transient::TransientStepData)
+    
     return collect(zip(transient.time, transient.dimensionlesssorption))
 end
 
