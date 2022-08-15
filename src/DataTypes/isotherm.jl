@@ -81,7 +81,7 @@ module IsothermHelperFunctions
     - Specifying both will return a single value.
     """
     function get_data(data::AbstractMatrix; step = : , component = : )
-        return data[step, component]
+        return @view data[step, component]
     end
 
     function get_data(data::Nothing; kwargs...)

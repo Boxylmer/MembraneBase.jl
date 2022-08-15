@@ -195,7 +195,10 @@ using Revise
         @test mole_fractions(iso; step=2) == [0.5, 0.5]
         @test mole_fractions(iso_2) == [1; 1; 1][:,:]
         
-        
+        # BenchmarkTools allocations
+        allocs = @allocated mole_fractions(iso_3)
+        @show allocs
+        @show @btime mole_fractions($iso_3)
 
 
     end
