@@ -61,11 +61,6 @@ module MembraneBase
     export mass_sorbed
     export penetrant_mass_fractions
 
-    #isotherm Datasets
-    # include(joinpath("DataTypes", "IsothermDatasets", "TPCDataset.jl"))
-    # export TPCDataset
-    # export get_isotherms
-
     # transient step data
     include(joinpath("DataTypes", "transientstep.jl"))
     export TransientStepData
