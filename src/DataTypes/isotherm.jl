@@ -119,13 +119,13 @@ For multicomponent isotherms, the format is dataset[step] = [[xcomp1, xcomp2, ..
     e.g., `mydataset = Isotherm.dataset(myisotherm.partial_pressures, myisotherm.concentrations)` gives a vector of vectors in the format of:
         myset[1] = [[(pressure of component 1), (pressure of component 2), ...], [(conc of component 1), (conc of component 2), ...]]
 """
-function isotherm_dataset(x::Matrix, y::Matrix, component::Int)
+function isotherm_dataset(x::AbstractMatrix, y::AbstractMatrix, component::Int)
     data_x = x[:, component]
     data_y = y[:, component]
     return [collect(item) for item in zip(data_x, data_y)]
 end 
 
-function isotherm_dataset(x::Matrix, y::Matrix)
+function isotherm_dataset(x::AbstractMatrix, y::AbstractMatrix)
     return [[x[idx, :], y[idx, :]] for idx in 1:size(x)[1]]
 end 
 
