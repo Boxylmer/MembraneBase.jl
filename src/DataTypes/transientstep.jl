@@ -1,26 +1,16 @@
-struct TransientStepData{N}
-    time::MVector{N, Float64}  # seconds
-    dimensionlesssorption::MVector{N, Float64}  # unitless
-end
-function TransientStepData(t::AbstractVector, dimensionlesssorption::AbstractVector)
-    n = length(t)
-    @assert n == length(dimensionlesssorption)
-    tt = eltype(t)
-    st = eltype(dimensionlesssorption)
-    if st <: Measurement && tt <: Measurement
-        return TransientStepData(
-            MVector{n, Float64}(strip_measurement_to_value(t)), 
-            MVector{n, Float64}(strip_measurement_to_value(dimensionlesssorption))
+# const TransientStepData = Tuple{<:Vector{<:Float64}, <:Vector{Float64}}
+
+struct TransientStepData
+    time::Union{Vector{<:Float64}, SubArray} # seconds
+    dimensionlesssorption::Union{Vector{<:Float64}, SubArray}  # unitless
+    function TransientStepData(t::AbstractVector, dimensionlesssorption::AbstractVector)
+        @assert length(t) == length(dimensionlesssorption)
+        return new(
+            strip_measurement_to_value(t), 
+            strip_measurement_to_value(dimensionlesssorption)
         )
-    elseif st <: Measurement
-        return TransientStepData(MVector{n, Float64}(t), MVector{n, Float64}(strip_measurement_to_value(dimensionlesssorption)))
-    elseif tt <: Measurement
-        return TransientStepData(MVector{n, Float64}(strip_measurement_to_value(t)), MVector{n, Float64}(dimensionlesssorption))
-    else
-        return TransientStepData(MVector{n, Float64}(t), MVector{n, Float64}(dimensionlesssorption))
     end
 end
-
 
 
 """
