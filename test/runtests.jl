@@ -122,9 +122,11 @@ using Revise
         b_σ = bootstrap_uncertainty(fitter, data)
         @test round(b_σ[1]; digits=0) == 1
 
-        bootstrap_allocs = @allocated bootstrap_uncertainty(fitter, data; nsamples=100)
+        bootstrap_allocs = @allocated bootstrap_uncertainty(fitter, data; nsamples=10000)
         @show bootstrap_allocs
-        @show @btime bootstrap_uncertainty($fitter, $data; nsamples=100)
+        @show @btime bootstrap_uncertainty($fitter, $data; nsamples=10000)
+        
+        @show @btime MembraneBase.bootstrap_uncertainty_original($fitter, $data; nsamples=10000)
     end
 
     @testset "Isotherm Data Structures" begin

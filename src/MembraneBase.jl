@@ -7,8 +7,9 @@ module MembraneBase
     using Bootstrap
     using StaticArrays
     using LinearAlgebra
-    using StatsBase
-    using Statistics
+    using StatsBase: sample!, sample
+    # using Statistics
+    using OnlineStats
     
     include("Constants.jl")
     include("HelperFunctions.jl")
