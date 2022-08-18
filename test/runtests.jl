@@ -122,8 +122,9 @@ using Revise
         b_σ = bootstrap_uncertainty(fitter, data)
         @test round(b_σ[1]; digits=0) == 1
 
-
-
+        bootstrap_allocs = @allocated bootstrap_uncertainty(fitter, data; nsamples=100)
+        @show bootstrap_allocs
+        @show @btime bootstrap_uncertainty($fitter, $data; nsamples=100)
     end
 
     @testset "Isotherm Data Structures" begin
@@ -188,10 +189,10 @@ using Revise
         @test mole_fractions(iso_2) == [1; 1; 1][:,:]
         
         # BenchmarkTools allocations
-        allocs = @allocated mole_fractions(iso_3)
-        @show allocs
-        @show @btime mole_fractions($iso_3)
-
+        # todo optimize mole_fractions
+        # allocs = @allocated mole_fractions(iso_3)
+        # @show allocs
+        # @show @btime mole_fractions($iso_3)
 
     end
 
