@@ -116,7 +116,7 @@ function Base.getindex(iso::IsothermData, step, component=:)
     nsteps = typeof(step) <: Colon ? num_steps(iso) : length(step) 
     ncomps = typeof(component) <: Colon ? num_components(iso) : length(component)
     return IsothermData(
-        materialize(partial_pressures(iso; component, step)),
+        partial_pressures(iso; component, step),
         concentration(iso; component, step),
         activities(iso; component, step),
         fugacities(iso; component, step),
