@@ -80,7 +80,7 @@ module IsothermHelperFunctions
     - Specifying one of the above returns a vector.
     - Specifying both will return a single value.
     """
-    function get_data(data::AbstractMatrix; step = : , component = : )
+    function get_data(data::AbstractArray; step = : , component = : )
         return @view data[step, component]
     end
 
@@ -109,6 +109,22 @@ function IsothermData(;
     IsothermData(
         partial_pressure_matrix, concentration_matrix, activity_matrix, fugacity_matrix,
         temperature_k, rho_pol_g_cm3, molar_mass_vector, num_components, num_steps
+    )
+end
+
+function Base.getindex(iso::IsothermData, step, component=:)
+    nsteps = typeof(step) <: Colon ? num_steps(iso) : length(step) 
+    ncomps = typeof(component) <: Colon ? num_components(iso) : length(component)
+    return IsothermData(
+        materialize(partial_pressures(iso; component, step)),
+        concentration(iso; component, step),
+        activities(iso; component, step),
+        fugacities(iso; component, step),
+        temperature(iso),
+        polymer_density(iso),
+        molecular_weights(iso, component),
+        ncomps,
+        nsteps,
     )
 end
 
@@ -249,10 +265,13 @@ polymer_density(isotherm::IsothermData) = isotherm.polymer_density
 Get molecular weights of a component in the isotherm. 
 """
 function molecular_weights(isotherm::IsothermData, component=nothing)
-    if !isnothing(component)
+    if isnothing(isotherm.penetrant_molecular_weights)
+        return nothing
+    elseif !isnothing(component)
         return isotherm.penetrant_molecular_weights[component]
+    else
+        return isotherm.penetrant_molecular_weights
     end
-    return isotherm.penetrant_molecular_weights
 end
 
 

@@ -1,12 +1,12 @@
 # realy just a wrapper module to smooth the transition to the foreign bootstrap library
-# function bootstrap_uncertainty_original(fitting_function, data; nsamples=500)
-#     results = bootstrap(
-#         fitting_function, 
-#         data, 
-#         BalancedSampling(nsamples)
-#     )
-#     return stderror(results)
-# end
+function bootstrap_uncertainty_original(fitting_function, data; nsamples=500)
+    results = bootstrap(
+        fitting_function, 
+        data, 
+        BalancedSampling(nsamples)
+    )
+    return stderror(results)
+end
 
 evenly_sample(vec, n; replacement=true) = @views sample(vec[:], n; replace=replacement)
 evenly_sample!(preallocated, vec; replacement=true) = @views sample!(vec[:], preallocated; replace=replacement)

@@ -7,127 +7,128 @@ using Revise
 @testset "MembraneBase.jl" begin
     
 
-    @testset "Helper Methods" begin
+    # @testset "Helper Methods" begin
         
-        # ensure_matrices_are_same_size
-        mat1 = rand(1, 2, 3)
-        mat2 = rand(1, 2, 3)
-        mat3 = rand(1, 3, 3)
-        @test ensure_matrices_are_same_size(mat1, mat2) == size(mat1)
-        @test_throws DimensionMismatch ensure_matrices_are_same_size(mat1, mat3)
+    #     # ensure_matrices_are_same_size
+    #     mat1 = rand(1, 2, 3)
+    #     mat2 = rand(1, 2, 3)
+    #     mat3 = rand(1, 3, 3)
+    #     @test ensure_matrices_are_same_size(mat1, mat2) == size(mat1)
+    #     @test_throws DimensionMismatch ensure_matrices_are_same_size(mat1, mat3)
 
 
-        # add_uncertainty_to_values
-        val = 4
-        @test add_uncertainty_to_values([val], 0.1)[1] == 4 ± 0.4
+    #     # add_uncertainty_to_values
+    #     val = 4
+    #     @test add_uncertainty_to_values([val], 0.1)[1] == 4 ± 0.4
 
-        # chop_vector_at_first_missing_value
-        myvec = [1, 2, missing, 3]
-        @test [1, 2] == chop_vector_at_first_missing_value(myvec)
+    #     # chop_vector_at_first_missing_value
+    #     myvec = [1, 2, missing, 3]
+    #     @test [1, 2] == chop_vector_at_first_missing_value(myvec)
 
-        # first_nonmissing_parameter
-        myvec = [missing, missing, 2, missing, 3]
-        @test first_nonmissing_parameter(myvec...) == 2
-        @test ismissing(first_nonmissing_parameter(missing, missing))
+    #     # first_nonmissing_parameter
+    #     myvec = [missing, missing, 2, missing, 3]
+    #     @test first_nonmissing_parameter(myvec...) == 2
+    #     @test ismissing(first_nonmissing_parameter(missing, missing))
 
-        # safe_parse_bool
-        @test safe_parse_bool.(["True", "False", "true", "false", "t, ", "gf", missing]) == [true, false, true, false, false, false, false]
+    #     # safe_parse_bool
+    #     @test safe_parse_bool.(["True", "False", "true", "false", "t, ", "gf", missing]) == [true, false, true, false, false, false, false]
 
-        # strip_measurement_to_value
-        vals = [nothing, 1, 1 ± 3, [1 ± 1, 1 ± 1.12], [1 1; 1 1 ± 1]]
-        @test strip_measurement_to_value.(vals) == [nothing, 1, 1, [1, 1], [1 1; 1 1]]
+    #     # strip_measurement_to_value
+    #     vals = [nothing, 1, 1 ± 3, [1 ± 1, 1 ± 1.12], [1 1; 1 1 ± 1]]
+    #     @test strip_measurement_to_value.(vals) == [nothing, 1, 1, [1, 1], [1 1; 1 1]]
 
-        # contains_measurement_type
-        @test contains_measurement_type([1, 2, 3 ± 2])
+    #     # contains_measurement_type
+    #     @test contains_measurement_type([1, 2, 3 ± 2])
         
-        # squared_uncertainty_contribution
-        # fractional_uncertainty_contribution
-        a = 1 ± 2
-        b = 1 ± 4
-        c = a + b
-        @test squared_uncertainty_contribution(c, b) == 16
-        @test round(fractional_uncertainty_contribution(c, a); digits=8) == 0.2
+    #     # squared_uncertainty_contribution
+    #     # fractional_uncertainty_contribution
+    #     a = 1 ± 2
+    #     b = 1 ± 4
+    #     c = a + b
+    #     @test squared_uncertainty_contribution(c, b) == 16
+    #     @test round(fractional_uncertainty_contribution(c, a); digits=8) == 0.2
 
-        # rss
-        @test rss([2, 3], [0.8, 3]) == (2-0.8)^2
-        @test rss([2±2, 3±2], [0.8±1, 3]) == 0.36
+    #     # rss
+    #     @test rss([2, 3], [0.8, 3]) == (2-0.8)^2
+    #     @test rss([2±2, 3±2], [0.8±1, 3]) == 0.36
 
-        # approximate_hessian
-        # inverse_hessian
-        # rss_standard_error_squared
-        # rss_covariance_matrix
-        # rss_minimizer_standard_errors
-            # TODO 
+    #     # approximate_hessian
+    #     # inverse_hessian
+    #     # rss_standard_error_squared
+    #     # rss_covariance_matrix
+    #     # rss_minimizer_standard_errors
+    #         # TODO 
 
         
-        # fitting linear data
-        x = [1, 2, 3]
-        y = [2, 4.1, 5.8]
-        y_meas = [2 ± 0.0, 4.1 ± 0.4, 5.8 ± 0.3]
-        @test_logs (:warn,) fit_linear_data(x, y_meas)  # using a measurement with perfect precision should throw a warning
-        @test_nowarn fit_linear_data(x, y)  
+    #     # fitting linear data
+    #     x = [1, 2, 3]
+    #     y = [2, 4.1, 5.8]
+    #     y_meas = [2 ± 0.0, 4.1 ± 0.4, 5.8 ± 0.3]
+    #     @test_logs (:warn,) fit_linear_data(x, y_meas)  # using a measurement with perfect precision should throw a warning
+    #     @test_nowarn fit_linear_data(x, y)  
 
-        # conversion methods
-        molecular_weights = [1, 3., 4.13, π, 1e30]
-        mole_fractions = [0.2, 0.4, 0.1, 0.2, 0.1]
+    #     # conversion methods
+    #     molecular_weights = [1, 3., 4.13, π, 1e30]
+    #     mole_fractions = [0.2, 0.4, 0.1, 0.2, 0.1]
 
-        mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weights)
-        recovered_mole_fractions = mass_fractions_to_mole_fractions(mass_fractions, molecular_weights)
-        @test mole_fractions ≈ recovered_mole_fractions
+    #     mass_fractions = mole_fractions_to_mass_fractions(mole_fractions, molecular_weights)
+    #     recovered_mole_fractions = mass_fractions_to_mole_fractions(mass_fractions, molecular_weights)
+    #     @test mole_fractions ≈ recovered_mole_fractions
 
-        molar_volume = 0.228  # L/mol
-        density = molar_volume_to_density(molar_volume, mole_fractions, molecular_weights)
-        recovered_molar_volume = density_to_molar_volume(density, mole_fractions, molecular_weights)
-        @test molar_volume ≈ recovered_molar_volume
+    #     molar_volume = 0.228  # L/mol
+    #     density = molar_volume_to_density(molar_volume, mole_fractions, molecular_weights)
+    #     recovered_molar_volume = density_to_molar_volume(density, mole_fractions, molecular_weights)
+    #     @test molar_volume ≈ recovered_molar_volume
 
-        # taylor series expansions
-        function myfunc(x) 
-            return [
-                log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.5),
-                log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.4),
-                log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.3),
-                log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.2),
-                log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.1),
-                ]
-        end
-        taylorfunc = get_taylor_series_function(myfunc, [0.5, 0.5, 0.5, 0.5, 0.5], 17)
-        @test taylorfunc([0.1, 0.5, 0.1, 0.2, 0.56]) ≈ myfunc([0.1, 0.5, 0.1, 0.2, 0.56])
+    #     # taylor series expansions
+    #     function myfunc(x) 
+    #         return [
+    #             log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.5),
+    #             log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.4),
+    #             log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.3),
+    #             log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.2),
+    #             log(x[1] + x[2] + x[3]+ x[4]+ x[5] + 0.1),
+    #             ]
+    #     end
+    #     taylorfunc = get_taylor_series_function(myfunc, [0.5, 0.5, 0.5, 0.5, 0.5], 17)
+    #     @test taylorfunc([0.1, 0.5, 0.1, 0.2, 0.56]) ≈ myfunc([0.1, 0.5, 0.1, 0.2, 0.56])
 
-        # the inverse hessian methods
-        objective_function(xy) = ((xy[1] + xy[2])^2 + (xy[1]-1)^2 + (xy[2]-0.8)^2)^2
-        minimizer = [0.494234234, 0.25034623146]
-        @test errs = rss_minimizer_standard_errors(objective_function, minimizer, 10) ≈ [0.15049509481360718, 0.1517352228363271]
+    #     # the inverse hessian methods
+    #     objective_function(xy) = ((xy[1] + xy[2])^2 + (xy[1]-1)^2 + (xy[2]-0.8)^2)^2
+    #     minimizer = [0.494234234, 0.25034623146]
+    #     @test errs = rss_minimizer_standard_errors(objective_function, minimizer, 10) ≈ [0.15049509481360718, 0.1517352228363271]
 
-    end
+    # end
 
-    @testset "Statistical Methods" begin
-        ndata = 100
-        data_x = collect(1:ndata)
-        data_y = data_x # (data_x .+ randn(100)) .^ 2.5
-        data = collect(zip(data_x, data_y))
-        # function predictor(b_vec)
-        #     y = data_x .^ b_vec[1]
-        #     err = sum((y .- data_y) .^ 2)
-        #     return err / 1e9
-        # end
+    # @testset "Statistical Methods" begin
+    #     ndata = 100
+    #     data_x = collect(1:ndata)
+    #     data_y = data_x # (data_x .+ randn(100)) .^ 2.5
+    #     data = collect(zip(data_x, data_y))
+    #     # function predictor(b_vec)
+    #     #     y = data_x .^ b_vec[1]
+    #     #     err = sum((y .- data_y) .^ 2)
+    #     #     return err / 1e9
+    #     # end
 
-        # this doesn't actually fit anything, it just returns 5 plus a random number
-        function fitter(data_pairs)
-            return [5 + randn(1)[1]]
-        end
+    #     # this doesn't actually fit anything, it just returns 5 plus a random number
+    #     function fitter(data_pairs)
+    #         return [5 + randn(1)[1]]
+    #     end
 
-        j_σ = jackknife_uncertainty(fitter, data)
-        # @test round(j_σ[1]; digits=0) == 1
+    #     j_σ = jackknife_uncertainty(fitter, data)
+    #     # @test round(j_σ[1]; digits=0) == 1
 
-        b_σ = bootstrap_uncertainty(fitter, data)
-        @test round(b_σ[1]; digits=0) == 1
+    #     b_σ = bootstrap_uncertainty(fitter, data)
+    #     @test round(b_σ[1]; digits=0) == 1
 
-        bootstrap_allocs = @allocated bootstrap_uncertainty(fitter, data; nsamples=10000)
-        @show bootstrap_allocs
-        @show @btime bootstrap_uncertainty($fitter, $data; nsamples=10000)
-        
-        @show @btime MembraneBase.bootstrap_uncertainty_original($fitter, $data; nsamples=10000)
-    end
+    #     bootstrap_allocs = @allocated bootstrap_uncertainty(fitter, data; nsamples=10000)
+    #     @show bootstrap_allocs
+    #     println("Bootstrap (Will)")
+    #     @show @btime bootstrap_uncertainty($fitter, $data; nsamples=10000)
+    #     println("Bootstrap (original, Bootstrap.jl)")
+    #     @show @btime MembraneBase.bootstrap_uncertainty_original($fitter, $data; nsamples=10000)
+    # end
 
     @testset "Isotherm Data Structures" begin
         # Basic isotherm creastion
@@ -161,7 +162,6 @@ using Revise
         @test isotherm_dataset(partial_pressures(iso_2), concentration(iso_2), 2)[2] == [2.5, 4]
         @test isotherm_dataset(partial_pressures(iso_2), concentration(iso_2))[2] == [[2.0, 2.5], [5.0, 4.0]]
 
-
         # test getter functions
         iso = IsothermData(partial_pressures_mpa = [[1, 2, 3], [1, 2, 3]], concentrations_cc = [[10, 20, 30], [40, 50, 60]], pen_mws_g_mol = [4, 6], rho_pol_g_cm3 = 1.12)
         iso_2 = IsothermData(partial_pressures_mpa = [1, 2, 3], concentrations_cc = [10, 20, 30], pen_mws_g_mol = 6, rho_pol_g_cm3 = 1.12)
@@ -188,8 +188,19 @@ using Revise
         @test mole_fractions(iso_3) ==  [0.5 0.5; 2/6 4/6; 0.25 0.75]
         @test mole_fractions(iso) == [0.5 0.5; 0.5 0.5; 0.5 0.5]
         @test mole_fractions(iso; step=2) == [0.5, 0.5]
-        @test mole_fractions(iso_2) == [1; 1; 1][:,:]
+        @test mole_fractions(iso_2) == [1; 1; 1][:, :]
         
+        # indexing
+        pres = [[1, 2, 3], [1.5, 2.5, 3.5]]
+        conc = [[2, 5, 10], [1, 4, 8]]
+        iso_4 = IsothermData(partial_pressures_mpa = pres, concentrations_cc = conc, pen_mws_g_mol = 6, rho_pol_g_cm3 = 1.12)
+        @show iso_5 = iso_4[2]
+        @show num_steps(iso_5)
+        @show num_components(iso_5)
+        @show partial_pressures(iso_4)
+        @show pps = partial_pressures(iso_5)
+        @show size(pps)
+
         # BenchmarkTools allocations
         # todo optimize mole_fractions
         # allocs = @allocated mole_fractions(iso_3)
