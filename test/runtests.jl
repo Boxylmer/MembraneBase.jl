@@ -191,22 +191,31 @@ using Revise
         @test mole_fractions(iso_2) == [1; 1; 1][:, :]
         
         # indexing
-        pres = [[1, 2, 3], [1.5, 2.5, 3.5]]
-        conc = [[2, 5, 10], [1, 4, 8]]
+
+        # the potential issue here is that calling a getter with a singleton of either step or component takes the internal data structure, 
+        #   a matrix of (steps * components) and returns a vector regardless of the original structure.
+        # when reconstructing the isotherm, a vector is passed in, which is always interpreted as steps.
+        pres = [[1, 2, 3, 4, 5, 6, 7], [1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1], [1.2, 2.2, 3.2, 4.2, 5.2, 6.2, 7.2]]
+        conc = [[10, 20, 30, 40, 50, 60, 70], [10.1, 20.1, 30.1, 40.1, 50.1, 60.1, 70.1], [10.2, 20.2, 30.2, 40.2, 50.2, 60.2, 70.2]]
         iso_4 = IsothermData(partial_pressures_mpa = pres, concentrations_cc = conc, pen_mws_g_mol = 6, rho_pol_g_cm3 = 1.12)
-        @show iso_5 = iso_4[2]
-        @show num_steps(iso_5)
-        @show num_components(iso_5)
-        @show partial_pressures(iso_4)
-        @show pps = partial_pressures(iso_5)
-        @show size(pps)
+        iso_5 = iso_4[2]  # get the isothermdata sliced at step 2
+        @test num_steps(iso_5) == 1
+        @test num_components(iso_5) == 3
+        @test size(partial_pressures(iso_4)) == (7, 3)
+        @test size(partial_pressures(iso_5)) == (1, 3)
+        @test partial_pressures(iso_4)[2, :][2] == partial_pressures(iso_5)[2]
+        @test partial_pressures(iso_5, component=1) == [2]
+        
+        
+        iso_6 = iso_4[2, 1]
+        @test partial_pressures(iso_4)[2, 1] == 2
+        @test partial_pressures(iso_6) == 2
 
         # BenchmarkTools allocations
         # todo optimize mole_fractions
         # allocs = @allocated mole_fractions(iso_3)
         # @show allocs
         # @show @btime mole_fractions($iso_3)
-
     end
 
     @testset "Isotherm Datasets - Deprecated" begin
@@ -244,7 +253,7 @@ using Revise
         @test recovered_tsd.dimensionlesssorption[6] == 0.97
         # @btime resample($tstep, 10, :Root)
         # @btime dataset($tstep)
+        
     end
-
 end # end overall tests
-nothing
+return nothing

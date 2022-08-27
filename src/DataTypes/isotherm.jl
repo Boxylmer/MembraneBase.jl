@@ -79,9 +79,20 @@ module IsothermHelperFunctions
     - Specifying neither `step` nor `component` returns the whole matrix.
     - Specifying one of the above returns a vector.
     - Specifying both will return a single value.
+    - Preserving the structure will avoid removing singleton dimensions (which a @view does automatically).
     """
-    function get_data(data::AbstractArray; step = : , component = : )
-        return @view data[step, component]
+    function get_data(data::AbstractArray; step = : , component = : , preserve_structure=false)
+        v = @view data[step, component]
+        s = size(v)
+        if preserve_structure && length(s) == 1
+            if typeof(step) <: Number      # asked for all components at a particular step
+                return reshape(v, :, s[1])
+            else                           # asked for all steps at a particular component
+                return reshape(v, s[1], :)
+            end
+        else
+            return v
+        end
     end
 
     function get_data(data::Nothing; kwargs...)
@@ -116,10 +127,10 @@ function Base.getindex(iso::IsothermData, step, component=:)
     nsteps = typeof(step) <: Colon ? num_steps(iso) : length(step) 
     ncomps = typeof(component) <: Colon ? num_components(iso) : length(component)
     return IsothermData(
-        partial_pressures(iso; component, step),
-        concentration(iso; component, step),
-        activities(iso; component, step),
-        fugacities(iso; component, step),
+        partial_pressures(iso; component, step, preserve_structure=true),
+        concentration(iso; component, step, preserve_structure=true),
+        activities(iso; component, step, preserve_structure=true),
+        fugacities(iso; component, step, preserve_structure=true),
         temperature(iso),
         polymer_density(iso),
         molecular_weights(iso, component),
@@ -160,22 +171,13 @@ function strip_measurement_to_value(iso::IsothermData)  # strip all measurements
 end
 
 # define a whole bunch of nice getter functions
-"""
-    pressure(isotherm::IsothermData; step)
-Get the total pressure at a step in the isotherm. If no step is provided, a vector of steps (`pressure[step]`) is returned.
-"""
-function pressure(isotherm::IsothermData; step=:)
-    if typeof(step) <: Colon
-        return sum(IsothermHelperFunctions.get_data(isotherm.partial_pressures; step=step); dims=2)[:]
-    elseif typeof(step) <: Integer
-        return sum(IsothermHelperFunctions.get_data(isotherm.partial_pressures; step=step))
-    end
-end
+# first do direct getters:
+
 """
     partial_pressures(isotherm::IsothermData; component, step)
 Get the partial pressures of some component in the isotherm. Also synonymous with `pressures`.
 """
-partial_pressures(isotherm::IsothermData; component=:, step=:) = IsothermHelperFunctions.get_data(isotherm.partial_pressures; component=component, step=step)
+partial_pressures(isotherm::IsothermData; component=:, step=:, kwargs...) = IsothermHelperFunctions.get_data(isotherm.partial_pressures; component=component, step=step, kwargs...)
 pressures = partial_pressures
 
 """
@@ -195,7 +197,7 @@ For example `concentration(some_isotherm; gas_units=:g, pol_units=:cc)` will get
     This method is far from optimized. In fact, every time `concentration` is called, all isotherm components are converted to whatever units were specified. So right now, if performance is critical and all concentrations are required, just get them all at once and iterate as needed.
 
 """
-function concentration(isotherm::IsothermData; component=:, step=:, gas_units=:cc, pol_units=:cc)
+function concentration(isotherm::IsothermData; component=:, step=:, gas_units=:cc, pol_units=:cc, kwargs...)
 
     # units start out in cc(STP)/cc(pol)
     if gas_units == :cc && pol_units == :cc
@@ -223,27 +225,16 @@ function concentration(isotherm::IsothermData; component=:, step=:, gas_units=:c
 end
 
 """
-    mole_fractions(isotherm::IsothermData, step=:)
-Get the mole fractions of some component in the isotherm.
-Mole fractions are assumed to be partial pressures over total pressure.  
-"""
-function mole_fractions(isotherm::IsothermData; step=:)
-    pressures = pressure(isotherm; step=step)
-    partial_pressures = IsothermHelperFunctions.get_data(isotherm.partial_pressures; step=step)
-    return partial_pressures ./ pressures
-end
-
-"""
     activities(isotherm::IsothermData, component=:, step=:)
 Get the activities of some component in the isotherm. 
 """
-activities(isotherm::IsothermData; component=:, step=:) = IsothermHelperFunctions.get_data(isotherm.activities; component=component, step=step)
+activities(isotherm::IsothermData; component=:, step=:, kwargs...) = IsothermHelperFunctions.get_data(isotherm.activities; component=component, step=step, kwargs...)
 
 """
     fugacity(isotherm::IsothermData, component=:, step=:)
 Get the fugacity of some component in the isotherm. 
 """
-fugacities(isotherm::IsothermData; component=:, step=:) = IsothermHelperFunctions.get_data(isotherm.fugacity; component=component, step=step)
+fugacities(isotherm::IsothermData; component=:, step=:, kwargs...) = IsothermHelperFunctions.get_data(isotherm.fugacity; component=component, step=step, kwargs...)
 
 
 """
@@ -252,13 +243,11 @@ Get the isotherm temperature.
 """
 temperature(isotherm::IsothermData) = isotherm.temperature
 
-
 """
     polymer_density(isotherm::IsothermData)
 Get the density of the polymer in the isotherm. 
 """
 polymer_density(isotherm::IsothermData) = isotherm.polymer_density
-
 
 """
     molecular_weights(isotherm::IsothermData, component=nothing)
@@ -274,13 +263,11 @@ function molecular_weights(isotherm::IsothermData, component=nothing)
     end
 end
 
-
 """
     num_components(isotherm::IsothermData)
 Get the number of components present in the isotherm. 
 """
 num_components(isotherm::IsothermData) = isotherm.num_components
-
 
 """
     num_steps(isotherm::IsothermData)
@@ -289,7 +276,29 @@ Get the number of steps present in the isotherm.
 num_steps(isotherm::IsothermData) = isotherm.num_steps
 
 
-# getter functions that do downstream caclulations on the isotherm data
+# on-the-fly getters
+"""
+    pressure(isotherm::IsothermData; step)
+Get the total pressure at a step in the isotherm. If no step is provided, a vector of steps (`pressure[step]`) is returned.
+"""
+function pressure(isotherm::IsothermData; step=:)
+    if typeof(step) <: Colon
+        return sum(IsothermHelperFunctions.get_data(isotherm.partial_pressures; step=step); dims=2)[:]
+    elseif typeof(step) <: Integer
+        return sum(IsothermHelperFunctions.get_data(isotherm.partial_pressures; step=step))
+    end
+end
+
+"""
+    mole_fractions(isotherm::IsothermData, step=:)
+Get the mole fractions of some component in the isotherm.
+Mole fractions are assumed to be partial pressures over total pressure.  
+"""
+function mole_fractions(isotherm::IsothermData; step=:)
+    pressures = pressure(isotherm; step=step)
+    partial_pressures = IsothermHelperFunctions.get_data(isotherm.partial_pressures; step=step)
+    return partial_pressures ./ pressures
+end
 
 """
     mass_sorbed(isotherm::IsothermData, polymer_mass_g::Number, component=:)
