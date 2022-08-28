@@ -20,7 +20,7 @@ Inputs can be vectors of vectors e.g., `partial_pressures_mpa = [[component_1-st
 Or, if only one component is present, only a vector e.g., `[step_1, step_2, ...]`
 
 """
-struct IsothermData{PPT, CT, AT, FT, TT, PDT, PMWT}
+struct IsothermData{PPT, CT, AT, FT, TT, PDT, PMWT} 
     partial_pressures::PPT              # MPa
     concentrations::CT                  # CC(STP)/CC(Pol)
     activities::AT                      # Unitless
@@ -82,6 +82,10 @@ module IsothermHelperFunctions
     - Preserving the structure will avoid removing singleton dimensions (which a @view does automatically).
     """
     function get_data(data::AbstractArray; step = : , component = : , preserve_structure=false)
+        if typeof(step) <: Number && typeof(component) <: Number && preserve_structure == false
+            return data[step, component]
+        end
+
         v = @view data[step, component]
         s = size(v)
         if preserve_structure && length(s) == 1
@@ -116,7 +120,12 @@ function IsothermData(;
     molar_mass_vector = IsothermHelperFunctions.convert_data_input_to_formatted_vector(pen_mws_g_mol)
 
     num_steps, num_components = ensure_matrices_are_same_size(partial_pressure_matrix, concentration_matrix, activity_matrix)
-    
+
+    if !isnothing(pen_mws_g_mol) && length(pen_mws_g_mol) != num_components
+        nmw = length(pen_mws_g_mol)
+        throw(DimensionMismatch("Number of molecular weights ($nmw) specified didn't match up with the number of components ($num_components)."))
+    end
+
     IsothermData(
         partial_pressure_matrix, concentration_matrix, activity_matrix, fugacity_matrix,
         temperature_k, rho_pol_g_cm3, molar_mass_vector, num_components, num_steps
@@ -124,7 +133,7 @@ function IsothermData(;
 end
 
 function Base.getindex(iso::IsothermData, step, component=:)
-    nsteps = typeof(step) <: Colon ? num_steps(iso) : length(step) 
+    nsteps = typeof(step) <: Colon ? num_steps(iso) : length(step)
     ncomps = typeof(component) <: Colon ? num_components(iso) : length(component)
     return IsothermData(
         partial_pressures(iso; component, step, preserve_structure=true),
@@ -323,4 +332,28 @@ function penetrant_mass_fractions(isotherm::IsothermData; component=:, step=:)
 
     return mass_fractions
 
+end
+
+# for docs later: Assumes isotherm steps are in chronological order
+function increasing_concentration(isotherm::IsothermData; silent=false)
+    cutoff_step = 0
+    for component in 1:num_components(isotherm)
+        temp_cutoff_step = 1
+        for step in 2:num_steps(isotherm)
+            if concentration(isotherm; step, component) > concentration(isotherm; step=temp_cutoff_step, component)
+                temp_cutoff_step = step
+            else
+                break
+            end
+        end
+        if cutoff_step == 0
+            cutoff_step = temp_cutoff_step
+        elseif cutoff_step != temp_cutoff_step
+            if !silent 
+                @warn "Could not find a point at which concentration stops increasing. Multiple components are present which do not follow the same increasing and decreasing order with steps."
+            end
+            return missing
+        end
+    end
+    return isotherm[1:cutoff_step]
 end

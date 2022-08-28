@@ -63,6 +63,7 @@ module MembraneBase
     export num_steps
     export mass_sorbed
     export penetrant_mass_fractions
+    export increasing_concentration
 
     # transient step data
     include(joinpath("DataTypes", "transientstep.jl"))
