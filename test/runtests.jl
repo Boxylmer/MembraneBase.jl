@@ -247,7 +247,7 @@ using Revise
         @test num_steps(iso_sorb) == 4 && num_components(iso_sorb) == 2
         @test partial_pressures(iso_sorb, step = 3) == [3, 4]
         allocs = @ballocated MembraneBase.increasing_concentration($iso_desorb) 
-        @test allocs == 288
+        @test allocs == 432
 
         # BenchmarkTools allocations
         # todo optimize mole_fractions
