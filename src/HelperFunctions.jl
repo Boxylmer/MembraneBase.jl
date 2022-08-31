@@ -1,11 +1,11 @@
 
 # utility methods
 
-"Throw an error if the given matrixes aren't the same size, otherwise return their size."
+"Throw an error if the given matrixes aren't the same size, otherwise return their size. Ignores `nothing`."
 function ensure_matrices_are_same_size(mats...)
     discovered_size = nothing
     for mat in mats  # for every matrix to be compared,
-        if !isnothing(mat)  # if there is data in the matrix, 
+        if !isnothing(mat) # if there is data in the matrix, 
             if !isnothing(discovered_size)  # and if we already know the size we're comparing,
                 if !(discovered_size == size(mat))  # do the comparison and throw an error if theres a mismatch,
                     throw(DimensionMismatch("Dimensions of steps and components did not match in one or more inputs."))
@@ -15,7 +15,12 @@ function ensure_matrices_are_same_size(mats...)
             end 
         end
     end
-    return discovered_size  # hand the verified size back for convenience
+    # hand the verified size back for convenience
+    if isnothing(discovered_size)
+        return (0, 0)
+    else
+        return discovered_size 
+    end
 end
 
 "add an uncertainty of m*x to the values x where m is the uncertainty_multiplier."

@@ -133,8 +133,26 @@ function IsothermData(;
 end
 
 function Base.getindex(iso::IsothermData, step, component=:)
-    nsteps = typeof(step) <: Colon ? num_steps(iso) : length(step)
-    ncomps = typeof(component) <: Colon ? num_components(iso) : length(component)
+    if num_steps(iso) == 0 
+        return iso
+    end
+    
+    if typeof(step) <: Colon
+        nsteps = num_steps(iso)
+    elseif typeof(step) <: Number
+        nsteps = 1
+    else
+        nsteps = length(step)
+    end
+
+    if typeof(component) <: Colon
+        ncomps = num_components(iso)
+    elseif typeof(component) <: Number
+        ncomps = 1
+    else
+        ncomps = length(component)
+    end
+    
     return IsothermData(
         partial_pressures(iso; component, step, preserve_structure=true),
         concentration(iso; component, step, preserve_structure=true),
@@ -334,8 +352,9 @@ function penetrant_mass_fractions(isotherm::IsothermData; component=:, step=:)
 
 end
 
-# for docs later: Assumes isotherm steps are in chronological order
-function increasing_concentration(isotherm::IsothermData; silent=false)
+"Get the final step before concentration starts to decrease. Returns missing if a step cannot be determined."
+function increasing_concentration_step_index(isotherm::IsothermData; silent=false)
+    if num_steps(isotherm) <= 1; return num_steps(isotherm); end
     cutoff_step = 0
     for component in 1:num_components(isotherm)
         temp_cutoff_step = 1
@@ -354,6 +373,30 @@ function increasing_concentration(isotherm::IsothermData; silent=false)
             end
             return missing
         end
+    end    
+    return cutoff_step
+end
+
+# for docs later: Assumes isotherm steps are in chronological order and increase first
+function increasing_concentration(isotherm::IsothermData; silent=false)
+    cutoff_step = increasing_concentration_step_index(isotherm; silent)
+    if ismissing(cutoff_step)
+        return missing
+    elseif cutoff_step == num_steps(isotherm)
+        return isotherm
+    else         
+        return isotherm[1:cutoff_step]
     end
-    return isotherm[1:cutoff_step]
+end
+
+# for docs later: Assumes isotherm steps are in chronological order and increase first, then decrease 
+function remove_increasing_concentration_steps(isotherm::IsothermData; silent=false)
+    cutoff_step = increasing_concentration_step_index(isotherm; silent)
+    if ismissing(cutoff_step)
+        return missing
+    elseif cutoff_step == num_steps(isotherm)
+        return IsothermData()
+    else         
+        return isotherm[cutoff_step:num_steps(isotherm)]
+    end
 end

@@ -122,12 +122,12 @@ using Revise
         b_σ = bootstrap_uncertainty(fitter, data)
         @test round(b_σ[1]; digits=0) == 1
 
-        bootstrap_allocs = @allocated bootstrap_uncertainty(fitter, data; nsamples=10000)
-        @show bootstrap_allocs
-        println("Bootstrap (Will)")
-        @show @btime bootstrap_uncertainty($fitter, $data; nsamples=10000)
-        println("Bootstrap (original, Bootstrap.jl)")
-        @show @btime MembraneBase.bootstrap_uncertainty_original($fitter, $data; nsamples=10000)
+        # bootstrap_allocs = @allocated bootstrap_uncertainty(fitter, data; nsamples=10000)
+        # @show bootstrap_allocs
+        # println("Bootstrap (Will)")
+        # @show @btime bootstrap_uncertainty($fitter, $data; nsamples=10000)
+        # println("Bootstrap (original, Bootstrap.jl)")
+        # @show @btime MembraneBase.bootstrap_uncertainty_original($fitter, $data; nsamples=10000)
     end
 
     @testset "Isotherm Data Structures" begin
@@ -224,6 +224,9 @@ using Revise
         @test partial_pressures(iso_8) == partial_pressures(iso_9) != partial_pressures(iso_10)
         
         # slicing
+        @test num_steps(IsothermData()[0, 0]) == 0
+        @test num_components(IsothermData()[0, 0]) == 0
+
         iso_11 = iso_4[1:3]
         @test partial_pressures(iso_11) == partial_pressures(iso_4, step=1:3)
         @test partial_pressures(iso_4, step=1:3, component=2:3) == partial_pressures(iso_4[1:3, 2:3])
@@ -243,11 +246,29 @@ using Revise
         iso_desorb_invalid = IsothermData(partial_pressures_mpa=pres, concentrations_cc=conc_invalid)
         @test ismissing(MembraneBase.increasing_concentration(iso_desorb_invalid; silent=true))
         
+        # can we filter for only sorbing parts of the isotherm?
         iso_sorb = MembraneBase.increasing_concentration(iso_desorb)
+        iso_sorb_redundant = MembraneBase.increasing_concentration(iso_sorb)
+        @test partial_pressures(iso_sorb, component=1, step=1) == partial_pressures(iso_sorb_redundant, component=1, step=1)
         @test num_steps(iso_sorb) == 4 && num_components(iso_sorb) == 2
         @test partial_pressures(iso_sorb, step = 3) == [3, 4]
         allocs = @ballocated MembraneBase.increasing_concentration($iso_desorb) 
-        @test allocs == 432
+        @show allocs == 432
+            
+        # can we get the non-sorption components of the isotherm?
+        iso_desorb_only = MembraneBase.remove_increasing_concentration_steps(iso_desorb)
+        @test num_steps(iso_desorb_only) == 4 && num_components(iso_desorb_only) == 2   # coincidence
+        @test partial_pressures(iso_desorb_only, step = 3) == [6, 7]
+        allocs = @ballocated MembraneBase.remove_increasing_concentration_steps($iso_desorb) 
+        @show allocs == 432
+
+        # what if there's no valid point? We should get a single step
+        iso_null = MembraneBase.increasing_concentration(iso_desorb_only)
+        @test num_steps(iso_null) == 1
+        @test num_components(iso_null) == 2
+
+        # decreasing concentration of sorption steps
+
 
         # BenchmarkTools allocations
         # todo optimize mole_fractions
