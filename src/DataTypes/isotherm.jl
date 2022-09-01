@@ -152,12 +152,15 @@ function Base.getindex(iso::IsothermData, step, component=:)
     else
         ncomps = length(component)
     end
-    
+
+    maybe_collect(_::Nothing) = nothing
+    maybe_collect(thing) = collect(thing)
+
     return IsothermData(
-        partial_pressures(iso; component, step, preserve_structure=true),
-        concentration(iso; component, step, preserve_structure=true),
-        activities(iso; component, step, preserve_structure=true),
-        fugacities(iso; component, step, preserve_structure=true),
+        maybe_collect(partial_pressures(iso; component, step, preserve_structure=true)),
+        maybe_collect(concentration(iso; component, step, preserve_structure=true)),
+        maybe_collect(activities(iso; component, step, preserve_structure=true)),
+        maybe_collect(fugacities(iso; component, step, preserve_structure=true)),
         temperature(iso),
         polymer_density(iso),
         molecular_weights(iso, component),
