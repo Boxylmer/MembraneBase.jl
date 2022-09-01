@@ -267,8 +267,6 @@ using Revise
         @test num_steps(iso_null) == 1
         @test num_components(iso_null) == 2
 
-        # decreasing concentration of sorption steps
-
 
         # BenchmarkTools allocations
         # todo optimize mole_fractions
