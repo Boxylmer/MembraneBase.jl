@@ -137,7 +137,7 @@ end
 
 "Calculate the sum of squared residuals of an `experimental` value to some `predicted` value`."
 function rss(experimental::AbstractVector{<:Measurement}, predicted::AbstractVector{<:Number})
-    return sum(([item.val for item in experimental] - strip_measurement_to_value(predicted)).^2 ./ [item.err for item in experimental].^2)
+    return sum(([item.val for item in experimental] - strip_measurement_to_value(predicted)).^2)
 end
 function rss(experimental::AbstractVector{<:Number}, predicted::AbstractVector{<:Number})
     return sum((strip_measurement_to_value(experimental) - strip_measurement_to_value(predicted)).^2)
