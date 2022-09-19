@@ -388,3 +388,9 @@ function polymer_phase_mass_fractions_to_ccpen_per_ccpol(mass_fractions, polymer
     g_per_g = polymer_phase_mass_fractions_to_gpen_per_gpol(mass_fractions)
     return g_per_g * CC_PER_MOL_STP * polymer_density_g_cm3 ./ penetrant_molecular_weights
 end
+
+# todo verify this 
+"Convert `CC(STP)/CC(polymer)`` to `g(penetrant)/g(polymer)`"
+function ccpen_per_ccpol_to_gpen_per_gpol(cc_per_cc, polymer_density_g_cm3, penetrant_molecular_weight)
+    return cc_per_cc / CC_PER_MOL_STP * penetrant_molecular_weight / polymer_density_g_cm3
+end
