@@ -50,7 +50,7 @@ using Revise
 
         # rss
         @test rss([2, 3], [0.8, 3]) == (2-0.8)^2
-        @test rss([2±2, 3±2], [0.8±1, 3]) == 0.36
+        @test rss([2±2, 3±2], [0.8±1, 3]) == 1.44
 
         # approximate_hessian
         # inverse_hessian
@@ -267,6 +267,15 @@ using Revise
         @test num_steps(iso_null) == 1
         @test num_components(iso_null) == 2
 
+        # there was an example where a single desorption step didn't work
+        pres = [[1, 2, 3, 4, 5]]
+        conc = [[1, 2, 3, 4, 3]]
+        iso_desorb_only_one = IsothermData(partial_pressures_mpa=pres, concentrations_cc=conc)
+        iso_sorb = increasing_concentration(iso_desorb_only_one)
+        @test num_steps(iso_desorb_only_one) == 5
+        @test num_steps(iso_sorb) == 4
+        iso_desorb_only = remove_increasing_concentration_steps(iso_desorb_only_one)
+        @test num_steps(iso_desorb_only) == 2
 
         # BenchmarkTools allocations
         # todo optimize mole_fractions
