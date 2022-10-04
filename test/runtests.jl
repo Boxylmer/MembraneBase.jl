@@ -80,6 +80,17 @@ using Revise
         recovered_molar_volume = density_to_molar_volume(density, mole_fractions, molecular_weights)
         @test molar_volume ≈ recovered_molar_volume
 
+
+        poly_dens = 1.2
+        molwt = 18.02
+        conc = 10
+        frac_dil = 0.01
+        specvol = polymer_specific_volume(poly_dens)
+        @test specvol == 1/poly_dens
+        specvol = polymer_specific_volume(poly_dens, frac_dil, conc, molwt)
+        @test specvol ≈ 0.8360652952690476
+         
+
         # taylor series expansions
         function myfunc(x) 
             return [
@@ -97,6 +108,7 @@ using Revise
         objective_function(xy) = ((xy[1] + xy[2])^2 + (xy[1]-1)^2 + (xy[2]-0.8)^2)^2
         minimizer = [0.494234234, 0.25034623146]
         @test errs = rss_minimizer_standard_errors(objective_function, minimizer, 10) ≈ [0.15049509481360718, 0.1517352228363271]
+
 
     end
 

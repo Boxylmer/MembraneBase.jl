@@ -45,6 +45,7 @@ module MembraneBase
     export density_to_molar_volume
     export polymer_phase_mass_fractions_to_gpen_per_gpol
     export polymer_phase_mass_fractions_to_ccpen_per_ccpol
+    export polymer_specific_volume
 
     # isotherm methods
     include(joinpath("DataTypes", "isotherm.jl"))

@@ -394,3 +394,8 @@ end
 function ccpen_per_ccpol_to_gpen_per_gpol(cc_per_cc, polymer_density_g_cm3, penetrant_molecular_weight)
     return cc_per_cc / CC_PER_MOL_STP * penetrant_molecular_weight / polymer_density_g_cm3
 end
+
+"Convert polymer density to specific volume, optionally with dilation."
+function polymer_specific_volume(ρ_dry_g_per_cc::Number, volume_fractional_dilation::Number=0, concentration_cc_per_cc::Number=0, penetrant_molecular_weight_g_mol::Number=0)
+    return (1 + volume_fractional_dilation) / (ρ_dry_g_per_cc * (1 + (penetrant_molecular_weight_g_mol * concentration_cc_per_cc)/(CC_PER_MOL_STP * ρ_dry_g_per_cc)))
+end
