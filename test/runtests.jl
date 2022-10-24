@@ -333,5 +333,13 @@ using Revise
         # @btime dataset($tstep)
         
     end
+
+    @testset "Misc" begin
+        # make sure the modification to taylorseries works
+        using TaylorSeries
+        t = log1p(Taylor1(16))
+        @test round(t(eps()); digits=10) == 0
+    end
+
 end # end overall tests
 return nothing

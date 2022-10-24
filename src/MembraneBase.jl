@@ -2,6 +2,7 @@ module MembraneBase
     using Measurements
     using FiniteDiff
     using TaylorSeries
+    Base.log1p(t::Taylor1{T}) where {T} = log(one(t[0]) + t)  # remove this once TaylorSeries implements log1p
     using GLM
     using DataFrames
     using Bootstrap
