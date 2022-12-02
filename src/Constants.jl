@@ -27,11 +27,17 @@ const L_PER_CC = 0.001
 const CC_PER_MOL_STP = 22414
 
 # permeability
-const BARRER_PER_CC_CC_MPA_CM2_S = 1 / (750.06156130264 * 1e-10)
+const BARRER_PER_CC_CC_MPA_CM2_S = 1 / (750.06156130264 * 1e-10)  # Barrer / (CCstp / (cm2 * s * MPa))
 const CC_CC_MPA_CM2_S_PER_BARRER = 1 / BARRER_PER_CC_CC_MPA_CM2_S
-const BARRER_PER_CCSTP_CM_S_CMHG = 1e-10   # Barrer / (CCstp / (cm2 * s * cmHg))
+
+const BARRER_PER_CCSTP_CM_S_CMHG = 1 / 1e-10   # Barrer / (CCstp / (cm2 * s * cmHg))
 const CCSTP_CM_S_CMHG_PER_BARRER = 1 / BARRER_PER_CCSTP_CM_S_CMHG
-const BARRER_PER_CCSTP_CM_S_ATM = 75.99998769899 * BARRER_PER_CCSTP_CM_S_CMHG  # Barrer / (CCstp / (cm2 * s * atm))
+
+const BARRER_PER_CCSTP_CM_S_ATM = (1/75.99998769899) * BARRER_PER_CCSTP_CM_S_CMHG  # Barrer / (CCstp / (cm2 * s * atm))
 const CCSTP_CM_S_ATM_PER_BARRER = 1 / BARRER_PER_CCSTP_CM_S_ATM
-const BARRER_PER_MOL_CM_S_ATM = BARRER_PER_CCSTP_CM_S_ATM / CC_PER_MOL_STP  # Barrer / (mol / (cm2 * s * atm))
+
+const BARRER_PER_MOL_CM_S_ATM = BARRER_PER_CCSTP_CM_S_ATM * CC_PER_MOL_STP  # Barrer / (mol / (cm2 * s * atm))
 const MOL_CM_S_ATM_PER_BARRER = 1 / BARRER_PER_MOL_CM_S_ATM
+
+
+# BARRER_PER_CC_CC_MPA_CM2_S * CC_PER_MOL_STP * 9.86923 -> should convert BARRER_PER_CC_CC_MPA_CM2_S into BARRER_PER_MOL_CM_S_ATM
