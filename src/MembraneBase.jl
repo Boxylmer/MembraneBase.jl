@@ -9,7 +9,7 @@ module MembraneBase
     using StaticArrays
     using LinearAlgebra
     using StatsBase: sample!, sample
-    # using Statistics
+    
     using OnlineStats
     
     include("Constants.jl")
