@@ -2,7 +2,7 @@ name: Documentation
 on:
   push:
     branches:
-      - main
+      - master
     tags: ['*']
   pull_request:
 concurrency:
@@ -35,6 +35,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using MembranePlotting
-            DocMeta.setdocmeta!(MembranePlotting, :DocTestSetup, :(using MembraneBase); recursive=true)
+            using MembraneBase
+            DocMeta.setdocmeta!(MembraneBase, :DocTestSetup, :(using MembraneBase); recursive=true)
             doctest(MembraneBase)'
