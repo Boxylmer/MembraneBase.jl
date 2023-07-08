@@ -19,6 +19,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/Boxylmer/MembraneBaseDocs.git",
+    repo="github.com/Boxylmer/MembraneBase.jl.git",
     devbranch="master",
 )
