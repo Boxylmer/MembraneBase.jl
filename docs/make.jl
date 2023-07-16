@@ -4,7 +4,7 @@ DocMeta.setdocmeta!(MembraneBase, :DocTestSetup, :(using MembraneBase); recursiv
 
 makedocs(;
     modules=[MembraneBase],
-    authors="Will <sypheren@gmail.com> and contributors",
+    authors="Will <william.joseph.box@gmail.com> and contributors",
     repo="https://github.com/Boxylmer/MembraneBase.jl/blob/{commit}{path}#{line}",
     sitename="MembraneBase.jl",
     format=Documenter.HTML(;
@@ -18,7 +18,8 @@ makedocs(;
     ],
 )
 
+ENV["GITHUB_REPOSITORY"] = "Boxylmer/MembraneBaseDocs"
 deploydocs(;
-    repo="github.com/Boxylmer/MembraneBase.jl.git",
+    repo="github.com/Boxylmer/MembraneBaseDocs.git",
     devbranch="master",
 )
