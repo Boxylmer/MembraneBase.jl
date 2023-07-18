@@ -15,6 +15,8 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Isotherm Data" => "IsothermData.md",
+        "Transient Step Data" => "TransientStepData.md"
     ],
 )
 

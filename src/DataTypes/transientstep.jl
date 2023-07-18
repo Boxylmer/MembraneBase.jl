@@ -111,7 +111,6 @@ function resample(transient::TransientStepData, num_datapoints, time_function; s
 end
 
 function dataset(transient::TransientStepData)
-    
     return collect(zip(transient.time, transient.dimensionlesssorption))
 end
 
