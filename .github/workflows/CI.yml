@@ -37,6 +37,8 @@ jobs:
       - uses: codecov/codecov-action@v3
         with:
           files: lcov.info
+        env:
+          CODECOV_TOKEN: ${{ secrets.DOCUMENTER_KEY }}
   docs:
     name: Documentation
     runs-on: ubuntu-latest
@@ -57,7 +59,7 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1
         env:
-            DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # If authenticating with SSH deploy key
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # If authenticating with SSH deploy key
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest

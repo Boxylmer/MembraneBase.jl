@@ -3,6 +3,7 @@ using Test
 using Measurements
 using BenchmarkTools
 using Revise
+using TaylorSeries
 
 @testset "MembraneBase.jl" begin
     
