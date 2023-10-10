@@ -12,10 +12,10 @@ TransientStepData objects hold information pertaining to *transient sorption ste
 TransientStepData
 ```
 
-
-
 A number of functions exist to make your life easier with handling this data. 
 
 ```@docs
 resample(::TransientStepData, ::Any, ::Any)
+dataset(transient::TransientStepData)
+strip_measurement_to_value(meas::TransientStepData)
 ```

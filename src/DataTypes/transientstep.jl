@@ -110,10 +110,12 @@ function resample(transient::TransientStepData, num_datapoints, time_function; s
 
 end
 
+"Get a Vector of data in the transient step in form of [(time, sorption)...]. Used primarily for bootstrap-like resampling techniques."
 function dataset(transient::TransientStepData)
     return collect(zip(transient.time, transient.dimensionlesssorption))
 end
 
+"Return a copy of the data with no Measurement data types present."
 function strip_measurement_to_value(meas::TransientStepData)
     return TransientStepData(strip_measurement_to_value(meas.time), strip_measurement_to_value(meas.dimensionlesssorption))
 end
