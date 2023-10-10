@@ -17,6 +17,9 @@ TaylorSeries = "6aa5eb33-94cf-58f4-a9d0-e4b2c4fc25ea"
 
 [compat]
 Bootstrap = "2"
+OnlineStats = "1"
+Measurements = "2"
+FiniteDiff = "2"
 julia = "1.6"
 
 [extras]
