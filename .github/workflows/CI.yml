@@ -38,7 +38,7 @@ jobs:
         with:
           files: lcov.info
         env:
-          CODECOV_TOKEN: ${{ secrets.DOCUMENTER_KEY }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   docs:
     name: Documentation
     runs-on: ubuntu-latest
