@@ -20,7 +20,7 @@ makedocs(;
     ],
 )
 
-# ENV["GITHUB_REPOSITORY"] = "Boxylmer/MembraneBaseDocs"
+ENV["GITHUB_REPOSITORY"] = "Boxylmer/MembraneBase.jl"
 deploydocs(;
     repo="github.com/Boxylmer/MembraneBase.jl.git",
     devbranch="master",
