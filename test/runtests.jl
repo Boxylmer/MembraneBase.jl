@@ -273,6 +273,13 @@ using TaylorSeries
         @test concentration(iso_sorb) == concentration(increasing_concentration(iso_sorb))
         @test activities(iso_sorb) == activities(increasing_concentration(iso_sorb))
 
+        # does broadcasting cause problems
+        iso_1 = IsothermData(concentrations_cc=[1, 2, 3, 2])
+        iso_2 = IsothermData(concentrations_cc=[1, 2, 3, 2, 1] .± 0.1)
+        iso_3 = IsothermData(concentrations_cc=[1, 2, 3, 4, 5, 6])
+        @test num_steps.(increasing_concentration.([iso_1, iso_2, iso_3])) == [3, 3, 6]
+
+
         # can we get the non-sorption components of the isotherm?
         iso_desorb_only = MembraneBase.remove_increasing_concentration_steps(iso_desorb)
         @test num_steps(iso_desorb_only) == 4 && num_components(iso_desorb_only) == 2   # coincidence
