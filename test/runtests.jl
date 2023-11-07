@@ -267,7 +267,12 @@ using TaylorSeries
         @test partial_pressures(iso_sorb, step = 3) == [3, 4]
         allocs = @ballocated MembraneBase.increasing_concentration($iso_desorb) 
         @show allocs == 432
-            
+
+        # do uncertainties cause problems here?
+        iso_sorb = IsothermData(partial_pressures_mpa=[1, 2, 3] .± 0.1, concentrations_cc=[10, 20., 30.] .± 0.5, activities = [0.1, 0.2, 0.3] .± 0.001)
+        @test concentration(iso_sorb) == concentration(increasing_concentration(iso_sorb))
+        @test activities(iso_sorb) == activities(increasing_concentration(iso_sorb))
+
         # can we get the non-sorption components of the isotherm?
         iso_desorb_only = MembraneBase.remove_increasing_concentration_steps(iso_desorb)
         @test num_steps(iso_desorb_only) == 4 && num_components(iso_desorb_only) == 2   # coincidence
