@@ -228,11 +228,13 @@ function fit_linear_data(x::AbstractVector{<:Number}, y::AbstractVector{<:Number
     return slope, intercept
 end
 
-function fit_linear_data(x::AbstractVector{<:Number}, y::AbstractVector{<:Measurement})
+function fit_linear_data(x::AbstractVector{<:Number}, y::AbstractVector{<:Measurement}; verbose=false)
     weights = [1 / (meas.err^2) for meas in y]
     for wt in weights
         if isinf(wt)
-            @warn("A measurement uncertainty was zero. (weight_i = 1/var_i^2 = Inf when var_i = 0)\nDefaulting to unweighted linear regression.")
+            if verbose 
+                @warn("A measurement uncertainty was zero. (weight_i = 1/var_i^2 = Inf when var_i = 0)\nDefaulting to unweighted linear regression.")
+            end
             weights = missing
         end
     end
