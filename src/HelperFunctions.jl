@@ -157,17 +157,10 @@ inverse_hessian(rss_func::Function, minimizer_values::AbstractVector{<:Number}) 
 "Estimate the standard error squared" # depricated? todo remove this
 rss_standard_error_squared(rss_value, num_params::Integer, num_datapts::Integer) = (rss_value / (num_datapts - num_params))
 
-# function rss_covariance_matrix(rss_func::Function, minimizer_values::AbstractVector{<:Number}, num_observations::Integer)
-#     inv_hess = inverse_hessian(rss_func, minimizer_values)
-#     rss_squared = rss_standard_error_squared(rss_func(minimizer_values), length(minimizer_values), num_observations)
-#     cov_mat = inv_hess * rss_squared
-#     return cov_mat
-# end 
 
 "Estimate the RSS covariance matrix using the inverse hessian method."
 function rss_covariance_matrix(rss_func::Function, minimizer_values::AbstractVector{<:Number}, num_observations::Integer)
     inv_hess = inverse_hessian(rss_func, minimizer_values)
-    # rss_squared = rss_standard_error_squared(rss_func(minimizer_values), length(minimizer_values), num_observations)
     dof = num_observations - length(minimizer_values)
     scaling_factor = rss_func(minimizer_values) / dof
     cov_mat = inv_hess * scaling_factor
