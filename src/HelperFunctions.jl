@@ -372,22 +372,48 @@ function density_to_molar_volume(density_g_cm3, mole_fractions, molecular_weight
     return molar_volume  # L / mol
 end
 
+# todo verify this 
+"Convert `CC(STP)/CC(polymer)`` to `g(penetrant)/g(polymer)`"
+function ccpen_per_ccpol_to_gpen_per_gpol(cc_per_cc, polymer_density_g_cm3, penetrant_molecular_weight)
+    return cc_per_cc / CC_PER_MOL_STP * penetrant_molecular_weight / polymer_density_g_cm3
+end
+
 "Convert polymer phase mass fractions to `g(penetrant)/g(polymer)`. Assumes that the polymer is the first item in the vector."
 function polymer_phase_mass_fractions_to_gpen_per_gpol(mass_fractions)
     return mass_fractions[2:end] ./ mass_fractions[1]
 end
 
-"Convert polymer phase mass fraction to CC(STP)/CC(polymer)."
+"Convert polymer phase mass fraction to CC(STP)/CC(polymer). Assumes that the polymer is the first item in the vector."
 function polymer_phase_mass_fractions_to_ccpen_per_ccpol(mass_fractions, polymer_density_g_cm3, penetrant_molecular_weights)
     # mass fractions includes the polymer
-    g_per_g = polymer_phase_mass_fractions_to_gpen_per_gpol(mass_fractions)
-    return g_per_g * CC_PER_MOL_STP * polymer_density_g_cm3 ./ penetrant_molecular_weights
+
+    mass_pol = mass_fractions[1]
+    mass_pens = mass_fractions[2:end]
+    
+    vol_pol = mass_pol / polymer_density_g_cm3 # cm3
+    mol_pens = mass_pens ./ penetrant_molecular_weights # g / (g/mol) = mol
+
+    cc_pens = mol_pens .* CC_PER_MOL_STP # mol * cc(STP) /mol = cc(STP)
+    concs = cc_pens ./ vol_pol # CC/CC
+    return concs
+
+    # g_per_g = polymer_phase_mass_fractions_to_gpen_per_gpol(mass_fractions)
+    # return g_per_g * CC_PER_MOL_STP * polymer_density_g_cm3 ./ penetrant_molecular_weights
 end
 
-# todo verify this 
-"Convert `CC(STP)/CC(polymer)`` to `g(penetrant)/g(polymer)`"
-function ccpen_per_ccpol_to_gpen_per_gpol(cc_per_cc, polymer_density_g_cm3, penetrant_molecular_weight)
-    return cc_per_cc / CC_PER_MOL_STP * penetrant_molecular_weight / polymer_density_g_cm3
+"Convert concentrations in CC(STP)/CC(polymer) to polymer phase mass fractions. The first index will be the polymer."
+function ccpen_per_ccpol_to_mass_fractions(cc_per_cc, polymer_density_g_cm3, penetrant_molecular_weights)
+    @assert length(cc_per_cc) == length(penetrant_molecular_weights)
+    # assume that x cc/cc is x CC STP per 1 cm3 of polymer
+    mol_pens = cc_per_cc ./ CC_PER_MOL_STP # cm3(stp) / (cm3(STP)/mol) = mol
+    mass_pens = mol_pens .* penetrant_molecular_weights # mol * g/mol = g
+    mass_poly = 1 * polymer_density_g_cm3
+    mass_system = sum(mass_pens) + mass_poly
+    mfracs = [mass_poly/mass_system; mass_pens ./ mass_system]
+    return mfracs
+
+    # mfrac_i = cc_per_cc .* penetrant_molecular_weights ./ (CC_PER_MOL_STP .* polymer_density_g_cm3)
+    # return [1-sum(mfrac_i); mfrac_i]
 end
 
 "Convert polymer density to specific volume, optionally with dilation."

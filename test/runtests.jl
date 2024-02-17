@@ -76,6 +76,19 @@ using TaylorSeries
         recovered_mole_fractions = mass_fractions_to_mole_fractions(mass_fractions, molecular_weights)
         @test mole_fractions ≈ recovered_mole_fractions
 
+        rho = 1.1
+        mw = [11, 12, 13, 14, 15]
+        ccs_1 = [1, 2, 3, 4, 5]
+        
+        mfracs = MembraneBase.ccpen_per_ccpol_to_mass_fractions(ccs_1, rho, mw)
+        recovered_concs = polymer_phase_mass_fractions_to_ccpen_per_ccpol(mfracs, rho, mw)
+        @test recovered_concs ≈ ccs_1
+        
+        ccs_2 = 4
+        mfrac = MembraneBase.ccpen_per_ccpol_to_mass_fractions(ccs_2, rho, mw[4])
+        recovered_conc = polymer_phase_mass_fractions_to_ccpen_per_ccpol(mfrac, rho, mw[4])
+        @test ccs_2 ≈ recovered_conc[1]
+
         molar_volume = 0.228  # L/mol
         density = molar_volume_to_density(molar_volume, mole_fractions, molecular_weights)
         recovered_molar_volume = density_to_molar_volume(density, mole_fractions, molecular_weights)
